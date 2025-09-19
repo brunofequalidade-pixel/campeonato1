@@ -1,166 +1,156 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscrições - Campeonato de Sinuca</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg">
-    <h1 class="text-2xl font-bold text-center mb-4">Inscrição Campeonato de Sinuca 🎱</h1>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js"; // <-- ADICIONADO deleteObject
 
-    <button id="toggleButton" class="w-full mb-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">
-      Nova Inscrição
-    </button>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
+    authDomain: "inscricaosinuca.firebaseapp.com",
+    projectId: "inscricaosinuca",
+    storageBucket: "inscricaosinuca.appspot.com",
+    messagingSenderId: "338241576305",
+    appId: "1:338241576305:web:288b6124384c6be4f76ad0",
+    measurementId: "G-PEDG30FS2R"
+  };
 
-    <section id="formSection" class="hidden">
-      <form id="registrationForm" class="space-y-4">
-        <input type="text" id="matricula" placeholder="Matrícula" class="w-full p-2 border rounded-lg" required>
-        <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
-        <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
-        <input type="file" id="fotoInput" accept="image/*" class="w-full" required>
-        <img id="previewFoto" class="w-32 h-32 object-cover rounded-full mx-auto hidden" alt="Prévia da foto">
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">Enviar Inscrição</button>
-      </form>
-    </section>
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
-    <section id="listSection">
-      <h2 class="text-xl font-semibold mb-2">Participantes inscritos</h2>
-      <div id="loadingMessage" class="text-gray-500 text-sm">Carregando participantes...</div>
-      <div id="participantList" class="space-y-2"></div>
-    </section>
-  </div>
+  const toggleButton = document.getElementById("toggleButton");
+  const formSection = document.getElementById("formSection");
+  const listSection = document.getElementById("listSection");
+  const registrationForm = document.getElementById("registrationForm");
+  const fotoInput = document.getElementById("fotoInput");
+  const previewFoto = document.getElementById("previewFoto");
+  const participantList = document.getElementById("participantList");
+  const loadingMessage = document.getElementById("loadingMessage");
+  // Adiciona uma referência ao botão de submit para poder desabilitá-lo
+  const submitButton = registrationForm.querySelector('button[type="submit"]');
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
+  let showForm = false;
+  let fotoFile = null;
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
-      authDomain: "inscricaosinuca.firebaseapp.com",
-      projectId: "inscricaosinuca",
-      storageBucket: "inscricaosinuca.appspot.com",
-      messagingSenderId: "338241576305",
-      appId: "1:338241576305:web:288b6124384c6be4f76ad0",
-      measurementId: "G-PEDG30FS2R"
-    };
+  toggleButton.addEventListener("click", () => {
+    showForm = !showForm;
+    formSection.classList.toggle("hidden", !showForm);
+    listSection.classList.toggle("hidden", showForm);
+    toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
+  });
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+  fotoInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      fotoFile = file;
+      const reader = new FileReader();
+      reader.onload = () => {
+        previewFoto.src = reader.result;
+        previewFoto.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
-    const toggleButton = document.getElementById("toggleButton");
-    const formSection = document.getElementById("formSection");
-    const listSection = document.getElementById("listSection");
-    const registrationForm = document.getElementById("registrationForm");
-    const fotoInput = document.getElementById("fotoInput");
-    const previewFoto = document.getElementById("previewFoto");
-    const participantList = document.getElementById("participantList");
-    const loadingMessage = document.getElementById("loadingMessage");
+  registrationForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    let showForm = false;
-    let fotoFile = null;
+    const matricula = document.getElementById("matricula").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const setor = document.getElementById("setor").value.trim();
 
-    toggleButton.addEventListener("click", () => {
-      showForm = !showForm;
-      formSection.classList.toggle("hidden", !showForm);
-      listSection.classList.toggle("hidden", showForm);
-      toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
-    });
+    if (!matricula || !nome || !setor || !fotoFile) {
+      alert("Preencha todos os campos, incluindo a foto!");
+      return;
+    }
 
-    fotoInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        fotoFile = file;
-        const reader = new FileReader();
-        reader.onload = () => {
-          previewFoto.src = reader.result;
-          previewFoto.classList.remove("hidden");
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    // Desabilita o botão para evitar envios múltiplos
+    submitButton.disabled = true;
+    submitButton.textContent = "Enviando...";
 
-    registrationForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    try {
+      const fileName = `${Date.now()}_${fotoFile.name}`;
+      const storageRef = ref(storage, `fotos/${fileName}`);
+      await uploadBytes(storageRef, fotoFile);
+      const fotoURL = await getDownloadURL(storageRef);
 
-      const matricula = document.getElementById("matricula").value.trim();
-      const nome = document.getElementById("nome").value.trim();
-      const setor = document.getElementById("setor").value.trim();
+      await addDoc(collection(db, "inscritos"), {
+        matricula,
+        nome,
+        setor,
+        fotoURL, // Salva a URL da foto
+        fotoPath: storageRef.fullPath, // Salva o caminho do arquivo para facilitar a exclusão
+        criado_em: new Date().toISOString()
+      });
 
-      if (!matricula || !nome || !setor || !fotoFile) {
-        alert("Preencha todos os campos!");
-        return;
-      }
+      // ---> MUDANÇA PRINCIPAL AQUI <---
+      alert("Inscrição realizada com sucesso!");
 
-      try {
-        const storageRef = ref(storage, `fotos/${Date.now()}_${fotoFile.name}`);
-        await uploadBytes(storageRef, fotoFile);
-        const fotoURL = await getDownloadURL(storageRef);
+      registrationForm.reset();
+      previewFoto.classList.add("hidden");
+      fotoFile = null;
 
-        await addDoc(collection(db, "inscritos"), {
-          matricula,
-          nome,
-          setor,
-          foto: fotoURL,
-          criado_em: new Date().toISOString()
-        });
+      // Volta para a lista de participantes (sem recarregar a página)
+      showForm = false;
+      formSection.classList.add("hidden");
+      listSection.classList.remove("hidden");
+      toggleButton.textContent = "Nova Inscrição";
 
-        registrationForm.reset();
-        previewFoto.classList.add("hidden");
-        fotoFile = null;
+    } catch (err) {
+      console.error("Erro ao salvar inscrição:", err);
+      alert("Erro ao salvar. Verifique o console para mais detalhes.");
+    } finally {
+      // Reabilita o botão, independentemente se deu certo ou errado
+      submitButton.disabled = false;
+      submitButton.textContent = "Enviar Inscrição";
+    }
+  });
 
-        showForm = false;
-        formSection.classList.add("hidden");
-        listSection.classList.remove("hidden");
-        toggleButton.textContent = "Nova Inscrição";
+  const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
+  onSnapshot(q, (snapshot) => {
+    loadingMessage.classList.add("hidden");
+    const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    participantList.innerHTML = "";
+    if (entries.length === 0) {
+      participantList.innerHTML = `<p class="text-sm text-gray-500">Nenhum participante ainda.</p>`;
+    } else {
+      entries.forEach(entry => {
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
 
-      } catch (err) {
-        console.error("Erro ao salvar inscrição:", err);
-        alert("Erro ao salvar. Veja o console para mais detalhes.");
-      }
-    });
-
-    const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
-    onSnapshot(q, (snapshot) => {
-      loadingMessage.classList.add("hidden");
-      const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      participantList.innerHTML = "";
-      if (entries.length === 0) {
-        participantList.innerHTML = `<p class="text-sm text-gray-500">Nenhum participante ainda.</p>`;
-      } else {
-        entries.forEach(entry => {
-          const div = document.createElement("div");
-          div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
-
-          div.innerHTML = `
-            <div class="flex items-center gap-3">
-              <img src="${entry.foto}" class="w-12 h-12 rounded-full object-cover">
-              <div>
-                <p class="font-medium">${entry.nome}</p>
-                <p class="text-sm text-gray-500">${entry.matricula} - ${entry.setor}</p>
-              </div>
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${entry.fotoURL}" class="w-12 h-12 rounded-full object-cover">
+            <div>
+              <p class="font-medium">${entry.nome}</p>
+              <p class="text-sm text-gray-500">${entry.matricula} - ${entry.setor}</p>
             </div>
-            <button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button>
-          `;
+          </div>
+          <button class="text-red-600 hover:text-red-800" data-id="${entry.id}" data-path="${entry.fotoPath}">🗑️</button>
+        `;
 
-          const btn = div.querySelector("button");
-          btn.addEventListener("click", async () => {
-            const senha = prompt("Digite a senha para excluir:");
-            if (senha === "dpsp123") {
+        const btn = div.querySelector("button");
+        btn.addEventListener("click", async () => {
+          const senha = prompt("Digite a senha para excluir:");
+          if (senha === "dpsp123") {
+            try {
+              // Excluir documento do Firestore
               await deleteDoc(doc(db, "inscritos", entry.id));
-            } else {
-              alert("Senha incorreta.");
+
+              // Excluir foto do Storage
+              if (entry.fotoPath) {
+                const fotoRef = ref(storage, entry.fotoPath);
+                await deleteObject(fotoRef);
+              }
+              
+            } catch (error) {
+              console.error("Erro ao excluir:", error);
+              alert("Não foi possível excluir o participante. Veja o console.");
             }
-          });
-
-          participantList.appendChild(div);
+          } else if (senha !== null) { // Evita alerta se o usuário cancelar o prompt
+            alert("Senha incorreta.");
+          }
         });
-      }
-    });
 
-  </script>
-</body>
-</html>
+        participantList.appendChild(div);
+      });
+    }
+  });
