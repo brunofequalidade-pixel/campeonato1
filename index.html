@@ -3,41 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscrições - Campeonato de Sinuca</title>
+  <title>Inscrições - Campeonato</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-lg">
-    <h1 class="text-2xl font-bold text-center mb-4">Inscrição Campeonato de Sinuca 🎱</h1>
+  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-2xl">
+    <h1 class="text-2xl font-bold text-center mb-4">Campeonato 🎮</h1>
 
-    <!-- Botão de alternância -->
-    <button id="toggleButton" class="w-full mb-4 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition">
-      Nova Inscrição
-    </button>
+    <div class="flex justify-between mb-4">
+      <button id="toggleButton" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+        Nova Inscrição
+      </button>
+      <button id="adminButton" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+        Área do ADM
+      </button>
+    </div>
 
-    <!-- Formulário -->
+    <!-- Formulário de inscrição -->
     <section id="formSection" class="hidden">
       <form id="registrationForm" class="space-y-4">
         <input type="text" id="matricula" placeholder="Matrícula" class="w-full p-2 border rounded-lg" required>
         <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
         <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">Enviar Inscrição</button>
+
+        <div>
+          <p class="font-semibold mb-2">Escolha suas modalidades:</p>
+          <div id="modalidadesList" class="grid grid-cols-2 gap-2"></div>
+          <p id="modalidadeInfo" class="text-xs text-gray-500 mt-1"></p>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+          Enviar Inscrição
+        </button>
       </form>
     </section>
 
-    <!-- Lista -->
+    <!-- Lista de participantes -->
     <section id="listSection">
       <h2 class="text-xl font-semibold mb-2">Participantes inscritos</h2>
       <div id="loadingMessage" class="text-gray-500 text-sm">Carregando participantes...</div>
       <div id="participantList" class="space-y-2"></div>
     </section>
+
+    <!-- Área do Administrador -->
+    <section id="adminSection" class="hidden">
+      <h2 class="text-xl font-bold mb-2">Área do Administrador</h2>
+      <div class="space-y-4">
+        <!-- Gerenciar modalidades -->
+        <div>
+          <h3 class="font-semibold">Gerenciar Modalidades</h3>
+          <div id="adminModalidadesList" class="space-y-1 mb-2"></div>
+          <div class="flex gap-2">
+            <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded-lg">
+            <button id="addModalidade" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar</button>
+          </div>
+        </div>
+
+        <!-- Configurar limite -->
+        <div>
+          <h3 class="font-semibold">Configurar Limite</h3>
+          <input type="number" id="limiteModalidades" min="1" class="p-2 border rounded-lg w-20">
+          <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-    // 🔥 SUA CONFIGURAÇÃO DO FIREBASE
+    // Config Firebase (sua chave já está aqui)
     const firebaseConfig = {
       apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
       authDomain: "inscricaosinuca.firebaseapp.com",
@@ -52,108 +88,189 @@
     const db = getFirestore(app);
 
     const toggleButton = document.getElementById("toggleButton");
+    const adminButton = document.getElementById("adminButton");
     const formSection = document.getElementById("formSection");
     const listSection = document.getElementById("listSection");
+    const adminSection = document.getElementById("adminSection");
     const registrationForm = document.getElementById("registrationForm");
     const participantList = document.getElementById("participantList");
     const loadingMessage = document.getElementById("loadingMessage");
+    const modalidadesList = document.getElementById("modalidadesList");
+    const adminModalidadesList = document.getElementById("adminModalidadesList");
+    const novaModalidade = document.getElementById("novaModalidade");
+    const addModalidadeBtn = document.getElementById("addModalidade");
+    const limiteInput = document.getElementById("limiteModalidades");
+    const salvarLimiteBtn = document.getElementById("salvarLimite");
+    const modalidadeInfo = document.getElementById("modalidadeInfo");
 
     let showForm = false;
+    let showAdmin = false;
+    let limiteEscolha = 2;
 
-    // Alternar entre formulário e lista
     toggleButton.addEventListener("click", () => {
       showForm = !showForm;
       formSection.classList.toggle("hidden", !showForm);
       listSection.classList.toggle("hidden", showForm);
+      adminSection.classList.add("hidden");
+      showAdmin = false;
       toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
     });
 
-    // Enviar inscrição
+    adminButton.addEventListener("click", async () => {
+      const senha = prompt("Digite a senha do administrador:");
+      if (senha === "dpsp123") {
+        showAdmin = !showAdmin;
+        adminSection.classList.toggle("hidden", !showAdmin);
+        listSection.classList.toggle("hidden", showAdmin);
+        formSection.classList.add("hidden");
+        showForm = false;
+        carregarModalidades();
+        carregarLimite();
+      } else if (senha !== null) {
+        alert("Senha incorreta.");
+      }
+    });
+
+    // Carregar modalidades
+    async function carregarModalidades() {
+      const snapshot = await getDocs(collection(db, "modalidades"));
+      modalidadesList.innerHTML = "";
+      adminModalidadesList.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const modalidade = docSnap.id;
+        // Para participantes
+        const label = document.createElement("label");
+        label.className = "flex items-center gap-2";
+        label.innerHTML = `<input type="checkbox" value="${modalidade}"> ${modalidade}`;
+        modalidadesList.appendChild(label);
+        // Para administrador
+        const div = document.createElement("div");
+        div.className = "flex justify-between items-center border p-1 rounded";
+        div.innerHTML = `<span>${modalidade}</span>
+          <button class="text-red-600 hover:text-red-800" data-id="${modalidade}">🗑️</button>`;
+        div.querySelector("button").addEventListener("click", async () => {
+          await deleteDoc(doc(db, "modalidades", modalidade));
+          carregarModalidades();
+        });
+        adminModalidadesList.appendChild(div);
+      });
+      atualizarInfo();
+    }
+
+    // Adicionar modalidade
+    addModalidadeBtn.addEventListener("click", async () => {
+      const nome = novaModalidade.value.trim();
+      if (!nome) return;
+      await setDoc(doc(db, "modalidades", nome), { criado_em: new Date().toISOString() });
+      novaModalidade.value = "";
+      carregarModalidades();
+    });
+
+    // Carregar limite
+    async function carregarLimite() {
+      const snap = await getDoc(doc(db, "config", "limite"));
+      if (snap.exists()) {
+        limiteEscolha = snap.data().valor;
+        limiteInput.value = limiteEscolha;
+      }
+      atualizarInfo();
+    }
+
+    // Salvar limite
+    salvarLimiteBtn.addEventListener("click", async () => {
+      const valor = parseInt(limiteInput.value);
+      if (valor > 0) {
+        limiteEscolha = valor;
+        await setDoc(doc(db, "config", "limite"), { valor });
+        atualizarInfo();
+        alert("Limite atualizado!");
+      }
+    });
+
+    function atualizarInfo() {
+      modalidadeInfo.textContent = `Você pode escolher até ${limiteEscolha} modalidade(s).`;
+    }
+
+    // Formulário de inscrição
     registrationForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const matricula = document.getElementById("matricula").value.trim();
       const nome = document.getElementById("nome").value.trim();
       const setor = document.getElementById("setor").value.trim();
-      const submitBtn = registrationForm.querySelector("button[type='submit']");
+
+      const escolhidas = Array.from(modalidadesList.querySelectorAll("input:checked")).map(c => c.value);
 
       if (!matricula || !nome || !setor) {
-        alert("Todos os campos são obrigatórios!");
+        alert("Preencha todos os campos!");
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Enviando...";
+      if (escolhidas.length === 0 || escolhidas.length > limiteEscolha) {
+        alert(`Escolha entre 1 e ${limiteEscolha} modalidades.`);
+        return;
+      }
+
+      // Verificar se já existe matrícula
+      const qMatricula = query(collection(db, "inscritos"), where("matricula", "==", matricula));
+      const snapshot = await getDocs(qMatricula);
+      if (!snapshot.empty) {
+        alert("Essa matrícula já está inscrita!");
+        return;
+      }
 
       try {
         await addDoc(collection(db, "inscritos"), {
-          matricula: matricula.toUpperCase(),
+          matricula,
           nome,
-          setor: setor.toUpperCase(),
-          criado_em: serverTimestamp() // ✅ Usa timestamp do Firestore
+          setor,
+          modalidades: escolhidas,
+          criado_em: new Date().toISOString()
         });
-
         alert("Inscrição realizada com sucesso!");
         registrationForm.reset();
-
-        showForm = false;
+        carregarModalidades();
         formSection.classList.add("hidden");
         listSection.classList.remove("hidden");
         toggleButton.textContent = "Nova Inscrição";
       } catch (err) {
-        console.error("Erro ao salvar inscrição:", err);
-        alert("Erro ao salvar. Veja o console para mais detalhes.");
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Enviar Inscrição";
+        console.error("Erro:", err);
+        alert("Erro ao salvar.");
       }
     });
 
-    // Lista em tempo real
+    // Carregar lista de inscritos
     const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
     onSnapshot(q, (snapshot) => {
       loadingMessage.classList.add("hidden");
-      const entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       participantList.innerHTML = "";
-
-      if (entries.length === 0) {
+      if (snapshot.empty) {
         participantList.innerHTML = `<p class="text-sm text-gray-500">Nenhum participante ainda.</p>`;
-      } else {
-        entries.forEach(entry => {
-          const div = document.createElement("div");
-          div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
-
-          // 🔥 Se ainda não tiver timestamp, evita erro
-          let dataFormatada = "Data não disponível";
-          if (entry.criado_em?.toDate) {
-            dataFormatada = entry.criado_em.toDate().toLocaleString("pt-BR");
-          }
-
-          div.innerHTML = `
-            <div>
-              <p class="font-medium">${entry.nome}</p>
-              <p class="text-sm text-gray-500">${entry.matricula} - ${entry.setor}</p>
-              <p class="text-xs text-gray-400">Inscrito em: ${dataFormatada}</p>
-            </div>
-            <button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button>
-          `;
-
-          const btn = div.querySelector("button");
-          btn.addEventListener("click", async () => {
-            const senha = prompt("Digite a senha para excluir:");
-            if (senha === "dpsp123") {
-              if (confirm(`Tem certeza que deseja excluir ${entry.nome}?`)) {
-                await deleteDoc(doc(db, "inscritos", entry.id));
-              }
-            } else if (senha !== null) {
-              alert("Senha incorreta.");
-            }
-          });
-
-          participantList.appendChild(div);
-        });
+        return;
       }
+      snapshot.forEach(docSnap => {
+        const entry = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
+        div.innerHTML = `
+          <div>
+            <p class="font-medium">${entry.nome}</p>
+            <p class="text-sm text-gray-500">${entry.matricula} - ${entry.setor}</p>
+            <p class="text-xs text-blue-600">Modalidades: ${entry.modalidades.join(", ")}</p>
+          </div>
+          <button class="text-red-600 hover:text-red-800" data-id="${docSnap.id}">🗑️</button>
+        `;
+        div.querySelector("button").addEventListener("click", async () => {
+          const senha = prompt("Digite a senha para excluir:");
+          if (senha === "dpsp123") {
+            await deleteDoc(doc(db, "inscritos", docSnap.id));
+          }
+        });
+        participantList.appendChild(div);
+      });
     });
+
+    carregarModalidades();
+    carregarLimite();
   </script>
 </body>
 </html>
