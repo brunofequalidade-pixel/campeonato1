@@ -35,17 +35,17 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-    // 🔥 CONFIGURAÇÃO DO FIREBASE (substitua pelos seus dados)
+    // 🔥 SUA CONFIGURAÇÃO DO FIREBASE
     const firebaseConfig = {
-      apiKey: "SUA_API_KEY",
-      authDomain: "SEU_AUTH_DOMAIN",
-      projectId: "SEU_PROJECT_ID",
-      storageBucket: "SEU_STORAGE_BUCKET",
-      messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-      appId: "SEU_APP_ID",
-      measurementId: "SEU_MEASUREMENT_ID"
+      apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
+      authDomain: "inscricaosinuca.firebaseapp.com",
+      projectId: "inscricaosinuca",
+      storageBucket: "inscricaosinuca.firebasestorage.app",
+      messagingSenderId: "338241576305",
+      appId: "1:338241576305:web:288b6124384c6be4f76ad0",
+      measurementId: "G-PEDG30FS2R"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -77,13 +77,8 @@
       const setor = document.getElementById("setor").value.trim();
       const submitBtn = registrationForm.querySelector("button[type='submit']");
 
-      // Validação
       if (!matricula || !nome || !setor) {
         alert("Todos os campos são obrigatórios!");
-        return;
-      }
-      if (matricula.length < 3) {
-        alert("A matrícula deve ter pelo menos 3 caracteres.");
         return;
       }
 
@@ -95,7 +90,7 @@
           matricula: matricula.toUpperCase(),
           nome,
           setor: setor.toUpperCase(),
-          criado_em: new Date().toISOString()
+          criado_em: serverTimestamp() // ✅ Usa timestamp do Firestore
         });
 
         alert("Inscrição realizada com sucesso!");
@@ -128,7 +123,11 @@
           const div = document.createElement("div");
           div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
 
-          const dataFormatada = new Date(entry.criado_em).toLocaleString("pt-BR");
+          // 🔥 Se ainda não tiver timestamp, evita erro
+          let dataFormatada = "Data não disponível";
+          if (entry.criado_em?.toDate) {
+            dataFormatada = entry.criado_em.toDate().toLocaleString("pt-BR");
+          }
 
           div.innerHTML = `
             <div>
