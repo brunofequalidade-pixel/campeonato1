@@ -66,6 +66,18 @@
         </section>
     </div>
 
+    <div id="passwordModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-80">
+            <h3 class="text-lg font-semibold mb-2 text-center">Área do Administrador</h3>
+            <p class="text-sm text-gray-600 mb-4 text-center">Digite a senha para continuar:</p>
+            <input type="password" id="modalPasswordInput" class="w-full p-2 border rounded-lg mb-4 text-center" placeholder="********">
+            <div class="flex justify-end gap-2">
+                <button id="modalCancelBtn" class="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-lg">Cancelar</button>
+                <button id="modalOkBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">OK</button>
+            </div>
+        </div>
+    </div>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
@@ -99,6 +111,13 @@
         const limiteInput = document.getElementById("limiteModalidades");
         const salvarLimiteBtn = document.getElementById("salvarLimite");
         const modalidadeInfo = document.getElementById("modalidadeInfo");
+        
+        // Novas variáveis do modal
+        const passwordModal = document.getElementById("passwordModal");
+        const modalPasswordInput = document.getElementById("modalPasswordInput");
+        const modalOkBtn = document.getElementById("modalOkBtn");
+        const modalCancelBtn = document.getElementById("modalCancelBtn");
+
 
         let showForm = false;
         let showAdmin = false;
@@ -113,19 +132,34 @@
             toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
         });
 
-        adminButton.addEventListener("click", async () => {
-            const senha = prompt("Digite a senha do administrador:");
+        adminButton.addEventListener("click", () => {
+            // Mostra o modal personalizado em vez de usar prompt()
+            passwordModal.classList.remove("hidden");
+        });
+
+        // Lógica para o botão OK do modal
+        modalOkBtn.addEventListener("click", async () => {
+            const senha = modalPasswordInput.value;
             if (senha === "dpsp123") {
-                showAdmin = !showAdmin;
-                adminSection.classList.toggle("hidden", !showAdmin);
-                listSection.classList.toggle("hidden", showAdmin);
+                showAdmin = true; // Força a exibição da área do ADM
+                adminSection.classList.remove("hidden");
+                listSection.classList.add("hidden");
                 formSection.classList.add("hidden");
                 showForm = false;
-                carregarModalidades();
-                carregarLimite();
-            } else if (senha !== null) {
+                await carregarModalidades();
+                await carregarLimite();
+            } else {
                 alert("Senha incorreta.");
             }
+            // Sempre esconde o modal após a tentativa
+            passwordModal.classList.add("hidden");
+            modalPasswordInput.value = ""; // Limpa o campo de senha
+        });
+
+        // Lógica para o botão Cancelar do modal
+        modalCancelBtn.addEventListener("click", () => {
+            passwordModal.classList.add("hidden");
+            modalPasswordInput.value = "";
         });
 
         // Carregar modalidades
