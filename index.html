@@ -25,6 +25,7 @@
         <input type="text" id="matricula" placeholder="Matrícula" class="w-full p-2 border rounded-lg" required>
         <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
         <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
+        <input type="tel" id="telefone" placeholder="Telefone (somente ADM verá)" class="w-full p-2 border rounded-lg" required>
 
         <div>
           <p class="font-semibold mb-2">Escolha suas modalidades:</p>
@@ -38,7 +39,7 @@
       </form>
     </section>
 
-    <!-- Lista de participantes (sem matrícula) -->
+    <!-- Lista de participantes (sem matrícula e sem telefone) -->
     <section id="listSection">
       <h2 class="text-xl font-semibold mb-2">Participantes inscritos</h2>
       <div id="loadingMessage" class="text-gray-500 text-sm">Carregando participantes...</div>
@@ -66,7 +67,7 @@
           <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
         </div>
 
-        <!-- Lista de inscritos (ADM vê matrícula) -->
+        <!-- Lista de inscritos (ADM vê matrícula e telefone) -->
         <div>
           <h3 class="font-semibold mb-2">Lista completa de inscritos</h3>
           <table class="w-full border text-sm" id="adminTable">
@@ -75,6 +76,7 @@
                 <th class="border p-2">Matrícula</th>
                 <th class="border p-2">Nome</th>
                 <th class="border p-2">Setor</th>
+                <th class="border p-2">Telefone</th>
                 <th class="border p-2">Modalidades</th>
                 <th class="border p-2">Ações</th>
               </tr>
@@ -220,10 +222,11 @@
       const matricula = document.getElementById("matricula").value.trim();
       const nome = document.getElementById("nome").value.trim();
       const setor = document.getElementById("setor").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
 
       const escolhidas = Array.from(modalidadesList.querySelectorAll("input:checked")).map(c => c.value);
 
-      if (!matricula || !nome || !setor) {
+      if (!matricula || !nome || !setor || !telefone) {
         alert("Preencha todos os campos!");
         return;
       }
@@ -245,6 +248,7 @@
           matricula,
           nome,
           setor,
+          telefone,
           modalidades: escolhidas,
           criado_em: new Date().toISOString()
         });
@@ -260,7 +264,7 @@
       }
     });
 
-    // Lista pública (sem matrícula)
+    // Lista pública (sem matrícula e sem telefone)
     const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
     onSnapshot(q, (snapshot) => {
       loadingMessage.classList.add("hidden");
@@ -287,7 +291,7 @@
       carregarAdminTable();
     });
 
-    // Tabela do ADM (com matrícula e excluir)
+    // Tabela do ADM (com matrícula e telefone)
     function carregarAdminTable() {
       adminTableBody.innerHTML = "";
       inscritosCache.forEach(entry => {
@@ -296,6 +300,7 @@
           <td class="border p-2">${entry.matricula}</td>
           <td class="border p-2">${entry.nome}</td>
           <td class="border p-2">${entry.setor}</td>
+          <td class="border p-2">${entry.telefone}</td>
           <td class="border p-2">${entry.modalidades.join(", ")}</td>
           <td class="border p-2 text-center">
             <button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button>
@@ -317,9 +322,9 @@
         alert("Nenhum inscrito para exportar!");
         return;
       }
-      let csv = "Matrícula,Nome,Setor,Modalidades\n";
+      let csv = "Matrícula,Nome,Setor,Telefone,Modalidades\n";
       inscritosCache.forEach(e => {
-        csv += `"${e.matricula}","${e.nome}","${e.setor}","${e.modalidades.join(" | ")}"\n`;
+        csv += `"${e.matricula}","${e.nome}","${e.setor}","${e.telefone}","${e.modalidades.join(" | ")}"\n`;
       });
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
