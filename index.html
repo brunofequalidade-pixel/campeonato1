@@ -25,13 +25,11 @@
                 <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
                 <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
                 <input type="tel" id="telefone" placeholder="Telefone (somente ADM verá)" class="w-full p-2 border rounded-lg" required>
-
                 <div>
                     <p class="font-semibold mb-2">Escolha suas modalidades:</p>
                     <div id="modalidadesList" class="grid grid-cols-2 gap-2"></div>
                     <p id="modalidadeInfo" class="text-xs text-gray-500 mt-1"></p>
                 </div>
-
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
                     Enviar Inscrição
                 </button>
@@ -44,42 +42,84 @@
             <div id="participantList" class="space-y-2"></div>
         </section>
 
+        <section id="confrontosSection" class="mt-6">
+             <h2 class="text-xl font-semibold mb-2">Confrontos e Resultados ⚔️</h2>
+             <div class="mb-2">
+                 <label for="confrontosFilter" class="text-sm font-medium">Filtrar por modalidade:</label>
+                 <select id="confrontosFilter" class="p-1 border rounded-md"></select>
+             </div>
+             <div id="confrontosList" class="space-y-3">
+                <p class="text-sm text-gray-500">Selecione uma modalidade para ver os confrontos.</p>
+             </div>
+        </section>
+
+
         <section id="adminSection" class="hidden">
-            <h2 class="text-xl font-bold mb-2">Área do Administrador</h2>
-            <div class="space-y-4">
-                <div>
-                    <h3 class="font-semibold">Gerenciar Modalidades</h3>
-                    <div id="adminModalidadesList" class="space-y-1 mb-2"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded-lg">
-                        <button id="addModalidade" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar</button>
+            <h2 class="text-xl font-bold mb-4">Área do Administrador</h2>
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold">Gerenciar Modalidades</h3>
+                        <div id="adminModalidadesList" class="space-y-1 mb-2 max-h-40 overflow-y-auto"></div>
+                        <div class="flex gap-2">
+                            <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded-lg">
+                            <button id="addModalidade" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar</button>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Configurar Limite</h3>
+                        <input type="number" id="limiteModalidades" min="1" class="p-2 border rounded-lg w-20">
+                        <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
                     </div>
                 </div>
 
                 <div>
-                    <h3 class="font-semibold">Configurar Limite</h3>
-                    <input type="number" id="limiteModalidades" min="1" class="p-2 border rounded-lg w-20">
-                    <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
-                </div>
-
-                <div>
                     <h3 class="font-semibold mb-2">Lista completa de inscritos</h3>
-                    <table class="w-full border text-sm" id="adminTable">
-                        <thead class="bg-gray-200">
-                            <tr>
-                                <th class="border p-2">Matrícula</th>
-                                <th class="border p-2">Nome</th>
-                                <th class="border p-2">Setor</th>
-                                <th class="border p-2">Telefone</th>
-                                <th class="border p-2">Modalidades</th>
-                                <th class="border p-2">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminTableBody"></tbody>
-                    </table>
+                    <div class="max-h-60 overflow-y-auto">
+                        <table class="w-full border text-sm" id="adminTable">
+                            <thead class="bg-gray-200 sticky top-0">
+                                <tr>
+                                    <th class="border p-2">Matrícula</th>
+                                    <th class="border p-2">Nome</th>
+                                    <th class="border p-2">Setor</th>
+                                    <th class="border p-2">Telefone</th>
+                                    <th class="border p-2">Modalidades</th>
+                                    <th class="border p-2">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminTableBody"></tbody>
+                        </table>
+                    </div>
                     <button id="exportCSV" class="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
                         📥 Exportar CSV
                     </button>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h3 class="font-semibold mb-2">Gerenciar Torneio</h3>
+                    <div class="mb-4">
+                        <label for="modalityManagerSelect" class="block text-sm font-medium text-gray-700">Selecione a modalidade:</label>
+                        <select id="modalityManagerSelect" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option>Selecione...</option>
+                        </select>
+                    </div>
+                    <div id="modalityManagerUI" class="hidden space-y-4">
+                        <div>
+                            <h4 class="font-medium">Fases da Modalidade</h4>
+                             <div id="fasesList" class="space-y-1 mb-2"></div>
+                             <div class="flex gap-2">
+                                <input type="text" id="novaFaseInput" placeholder="Nome da fase (ex: Oitavas)" class="flex-1 p-2 border rounded-lg">
+                                <button id="addFaseBtn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar Fase</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Confrontos</h4>
+                            <button id="drawMatchupsBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg my-2">
+                                Sortear Confrontos
+                            </button>
+                             <div id="adminConfrontosList" class="space-y-2"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -87,14 +127,14 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
         // Config Firebase - ATENÇÃO: SUBSTITUA POR SUAS CREDENCIAIS
         const firebaseConfig = {
             apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
             authDomain: "inscricaosinuca.firebaseapp.com",
             projectId: "inscricaosinuca",
-            storageBucket: "inscricaosinuca.firebasestorage.app",
+            storageBucket: "inscricaosinuca.appspot.com",
             messagingSenderId: "338241576305",
             appId: "1:338241576305:web:288b6124384c6be4f76ad0",
             measurementId: "G-PEDG30FS2R"
@@ -103,10 +143,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- Elementos do DOM ---
         const toggleButton = document.getElementById("toggleButton");
         const adminButton = document.getElementById("adminButton");
         const formSection = document.getElementById("formSection");
         const listSection = document.getElementById("listSection");
+        const confrontosSection = document.getElementById("confrontosSection");
         const adminSection = document.getElementById("adminSection");
         const registrationForm = document.getElementById("registrationForm");
         const participantList = document.getElementById("participantList");
@@ -120,16 +162,33 @@
         const modalidadeInfo = document.getElementById("modalidadeInfo");
         const adminTableBody = document.getElementById("adminTableBody");
         const exportCSVBtn = document.getElementById("exportCSV");
+        
+        // --- Novos Elementos do DOM (Recursos Adicionados) ---
+        const confrontosFilter = document.getElementById("confrontosFilter");
+        const confrontosList = document.getElementById("confrontosList");
+        const modalityManagerSelect = document.getElementById("modalityManagerSelect");
+        const modalityManagerUI = document.getElementById("modalityManagerUI");
+        const fasesList = document.getElementById("fasesList");
+        const novaFaseInput = document.getElementById("novaFaseInput");
+        const addFaseBtn = document.getElementById("addFaseBtn");
+        const drawMatchupsBtn = document.getElementById("drawMatchupsBtn");
+        const adminConfrontosList = document.getElementById("adminConfrontosList");
 
+        // --- Variáveis de Estado ---
         let showForm = false;
         let showAdmin = false;
         let limiteEscolha = 2;
         let inscritosCache = [];
+        let modalidadesCache = [];
 
+        // --- Funções Principais (Início) ---
+
+        // Alternar visibilidade das seções
         toggleButton.addEventListener("click", () => {
             showForm = !showForm;
             formSection.classList.toggle("hidden", !showForm);
             listSection.classList.toggle("hidden", showForm);
+            confrontosSection.classList.toggle("hidden", showForm);
             adminSection.classList.add("hidden");
             showAdmin = false;
             toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
@@ -141,52 +200,82 @@
                 showAdmin = !showAdmin;
                 adminSection.classList.toggle("hidden", !showAdmin);
                 listSection.classList.toggle("hidden", showAdmin);
+                confrontosSection.classList.toggle("hidden", showAdmin);
                 formSection.classList.add("hidden");
                 showForm = false;
-                carregarModalidades();
-                carregarLimite();
-                carregarAdminTable();
+                // Carrega dados necessários para o painel ADM
+                if (showAdmin) {
+                   await carregarModalidades();
+                   await carregarLimite();
+                   carregarAdminTable();
+                }
             } else if (senha !== null) {
                 alert("Senha incorreta.");
             }
         });
+        
+        // --- Lógica de Modalidades e Limite (Existente, com melhorias) ---
 
-        // Carregar modalidades
         async function carregarModalidades() {
-            const snapshot = await getDocs(collection(db, "modalidades"));
+            const snapshot = await getDocs(query(collection(db, "modalidades"), orderBy("criado_em")));
+            modalidadesCache = [];
             modalidadesList.innerHTML = "";
             adminModalidadesList.innerHTML = "";
+            modalityManagerSelect.innerHTML = `<option value="">Selecione...</option>`;
+            confrontosFilter.innerHTML = `<option value="">Todas</option>`;
+            
             snapshot.forEach(docSnap => {
                 const modalidade = docSnap.id;
-                // Para participantes
+                const modalidadeData = docSnap.data();
+                modalidadesCache.push({ id: modalidade, ...modalidadeData });
+
+                // Checkbox para formulário de inscrição
                 const label = document.createElement("label");
                 label.className = "flex items-center gap-2";
-                label.innerHTML = `<input type="checkbox" value="${modalidade}"> ${modalidade}`;
+                label.innerHTML = `<input type="checkbox" value="${modalidade}" name="modalidade_check"> ${modalidade}`;
                 modalidadesList.appendChild(label);
-                // Para administrador
+
+                // Item na lista de gerenciamento do ADM
                 const div = document.createElement("div");
                 div.className = "flex justify-between items-center border p-1 rounded";
-                div.innerHTML = `<span>${modalidade}</span>
-                    <button class="text-red-600 hover:text-red-800" data-id="${modalidade}">🗑️</button>`;
-                div.querySelector("button").addEventListener("click", async () => {
-                    await deleteDoc(doc(db, "modalidades", modalidade));
-                    carregarModalidades();
-                });
+                div.innerHTML = `<span>${modalidade}</span><button class="text-red-600 hover:text-red-800" data-id="${modalidade}">🗑️</button>`;
+                div.querySelector("button").addEventListener("click", () => handleDeleteModalidade(modalidade));
                 adminModalidadesList.appendChild(div);
+
+                // Opção no seletor do gerenciador de torneio
+                modalityManagerSelect.innerHTML += `<option value="${modalidade}">${modalidade}</option>`;
+                confrontosFilter.innerHTML += `<option value="${modalidade}">${modalidade}</option>`;
             });
+            
+            // Adiciona listener para os checkboxes de modalidades
+            modalidadesList.querySelectorAll('input[name="modalidade_check"]').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const checkedCount = modalidadesList.querySelectorAll('input[name="modalidade_check"]:checked').length;
+                    if (checkedCount > limiteEscolha) {
+                        alert(`Você só pode escolher até ${limiteEscolha} modalidades.`);
+                        checkbox.checked = false;
+                    }
+                });
+            });
+
             atualizarInfo();
         }
 
-        // Adicionar modalidade
+        async function handleDeleteModalidade(modalidadeId) {
+            if (!confirm(`Tem certeza que deseja excluir a modalidade "${modalidadeId}"? Confrontos e fases associados NÃO serão apagados.`)) return;
+            await deleteDoc(doc(db, "modalidades", modalidadeId));
+            carregarModalidades();
+        }
+        
         addModalidadeBtn.addEventListener("click", async () => {
             const nome = novaModalidade.value.trim();
             if (!nome) return;
-            await setDoc(doc(db, "modalidades", nome), { criado_em: new Date().toISOString() });
+            // Ao criar a modalidade, inicializa com um array de fases vazio.
+            await setDoc(doc(db, "modalidades", nome), { fases: [], criado_em: new Date() });
             novaModalidade.value = "";
             carregarModalidades();
         });
 
-        // Carregar limite
         async function carregarLimite() {
             const snap = await getDoc(doc(db, "config", "limite"));
             if (snap.exists()) {
@@ -210,57 +299,35 @@
             modalidadeInfo.textContent = `Você pode escolher até ${limiteEscolha} modalidade(s).`;
         }
 
-        // Formulário de inscrição
+        // --- Lógica de Inscrição e Listagem (Existente) ---
         registrationForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const matricula = document.getElementById("matricula").value.trim();
             const nome = document.getElementById("nome").value.trim();
             const setor = document.getElementById("setor").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
-
             const escolhidas = Array.from(modalidadesList.querySelectorAll("input:checked")).map(c => c.value);
 
-            if (!matricula || !nome || !setor || !telefone) {
-                alert("Preencha todos os campos!");
-                return;
-            }
-
-            if (escolhidas.length === 0 || escolhidas.length > limiteEscolha) {
-                alert(`Escolha entre 1 e ${limiteEscolha} modalidades.`);
-                return;
-            }
+            if (!matricula || !nome || !setor || !telefone) return alert("Preencha todos os campos!");
+            if (escolhidas.length === 0 || escolhidas.length > limiteEscolha) return alert(`Escolha entre 1 e ${limiteEscolha} modalidades.`);
 
             const qMatricula = query(collection(db, "inscritos"), where("matricula", "==", matricula));
-            const snapshot = await getDocs(qMatricula);
-            if (!snapshot.empty) {
-                alert("Essa matrícula já está inscrita!");
-                return;
-            }
+            if (!(await getDocs(qMatricula)).empty) return alert("Essa matrícula já está inscrita!");
 
             try {
-                await addDoc(collection(db, "inscritos"), {
-                    matricula,
-                    nome,
-                    setor,
-                    telefone,
-                    modalidades: escolhidas,
-                    criado_em: new Date().toISOString()
-                });
+                await addDoc(collection(db, "inscritos"), { matricula, nome, setor, telefone, modalidades: escolhidas, criado_em: new Date() });
                 alert("Inscrição realizada com sucesso!");
                 registrationForm.reset();
-                carregarModalidades();
-                formSection.classList.add("hidden");
-                listSection.classList.remove("hidden");
-                toggleButton.textContent = "Nova Inscrição";
+                toggleButton.click(); // Volta para a lista de participantes
             } catch (err) {
                 console.error("Erro:", err);
                 alert("Erro ao salvar.");
             }
         });
 
-        // Lista pública (sem matrícula e sem telefone)
-        const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
-        onSnapshot(q, (snapshot) => {
+        // Listener para lista PÚBLICA e CACHE
+        const qInscritos = query(collection(db, "inscritos"), orderBy("nome", "asc"));
+        onSnapshot(qInscritos, (snapshot) => {
             loadingMessage.classList.add("hidden");
             participantList.innerHTML = "";
             inscritosCache = [];
@@ -272,20 +339,17 @@
                 const entry = docSnap.data();
                 inscritosCache.push({ id: docSnap.id, ...entry });
                 const div = document.createElement("div");
-                div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
+                div.className = "p-2 border rounded-lg shadow-sm";
                 div.innerHTML = `
-                    <div>
-                        <p class="font-medium">${entry.nome}</p>
-                        <p class="text-sm text-gray-500">${entry.setor}</p>
-                        <p class="text-xs text-blue-600">Modalidades: ${entry.modalidades.join(", ")}</p>
-                    </div>
-                `;
+                    <p class="font-medium">${entry.nome}</p>
+                    <p class="text-sm text-gray-500">${entry.setor}</p>
+                    <p class="text-xs text-blue-600 mt-1">Modalidades: <strong>${entry.modalidades.join(", ")}</strong></p>`;
                 participantList.appendChild(div);
             });
-            carregarAdminTable();
+            if (showAdmin) carregarAdminTable(); // Atualiza a tabela do ADM se estiver aberta
         });
 
-        // Tabela do ADM (com matrícula e telefone)
+        // Tabela do ADM
         function carregarAdminTable() {
             adminTableBody.innerHTML = "";
             inscritosCache.forEach(entry => {
@@ -296,40 +360,334 @@
                     <td class="border p-2">${entry.setor}</td>
                     <td class="border p-2">${entry.telefone}</td>
                     <td class="border p-2">${entry.modalidades.join(", ")}</td>
-                    <td class="border p-2 text-center">
-                        <button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button>
-                    </td>
-                `;
+                    <td class="border p-2 text-center"><button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button></td>`;
                 tr.querySelector("button").addEventListener("click", async () => {
-                    const senha = prompt("Digite a senha para excluir:");
-                    if (senha === "dpsp123") {
+                    if (confirm("Tem certeza que deseja excluir este participante?")) {
                         await deleteDoc(doc(db, "inscritos", entry.id));
                     }
                 });
                 adminTableBody.appendChild(tr);
             });
         }
+        
+        // --- NOVAS FUNÇÕES: Gerenciamento de Torneio ---
 
-        // Exportar CSV
-        exportCSVBtn.addEventListener("click", () => {
-            if (inscritosCache.length === 0) {
-                alert("Nenhum inscrito para exportar!");
+        // Listener para o seletor de modalidade no painel ADM
+        modalityManagerSelect.addEventListener('change', (e) => {
+            const modalidadeId = e.target.value;
+            if (modalidadeId) {
+                modalityManagerUI.classList.remove('hidden');
+                renderAdminUIForModality(modalidadeId);
+            } else {
+                modalityManagerUI.classList.add('hidden');
+            }
+        });
+        
+        async function renderAdminUIForModality(modalidadeId) {
+            renderFasesAdmin(modalidadeId);
+            renderConfrontosAdmin(modalidadeId);
+            
+            // Reatribui eventos para os botões com o ID da modalidade atual
+            addFaseBtn.onclick = () => handleAddFase(modalidadeId);
+            drawMatchupsBtn.onclick = () => handleDrawMatchups(modalidadeId);
+        }
+
+        // --- Gerenciamento de Fases (ADM) ---
+        async function renderFasesAdmin(modalidadeId) {
+            fasesList.innerHTML = 'Carregando fases...';
+            const modalidadeDoc = await getDoc(doc(db, "modalidades", modalidadeId));
+            const fases = modalidadeDoc.exists() ? modalidadeDoc.data().fases || [] : [];
+            fasesList.innerHTML = '';
+            if (fases.length === 0) {
+                fasesList.innerHTML = '<p class="text-sm text-gray-500">Nenhuma fase cadastrada.</p>';
+            }
+            fases.forEach((fase, index) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center border p-1 rounded bg-gray-50";
+                div.innerHTML = `<span>${index + 1}. ${fase}</span> <button class="text-red-600 text-xs" data-fase="${fase}">🗑️</button>`;
+                div.querySelector('button').onclick = () => handleDeleteFase(modalidadeId, fase);
+                fasesList.appendChild(div);
+            });
+        }
+
+        async function handleAddFase(modalidadeId) {
+            const nomeFase = novaFaseInput.value.trim();
+            if (!nomeFase) return;
+            
+            const modalidadeRef = doc(db, "modalidades", modalidadeId);
+            const modalidadeDoc = await getDoc(modalidadeRef);
+            const fasesAtuais = modalidadeDoc.exists() ? modalidadeDoc.data().fases || [] : [];
+            
+            if (fasesAtuais.includes(nomeFase)) {
+                alert("Essa fase já existe.");
                 return;
             }
+
+            const novasFases = [...fasesAtuais, nomeFase];
+            await updateDoc(modalidadeRef, { fases: novasFases });
+            
+            novaFaseInput.value = '';
+            renderFasesAdmin(modalidadeId);
+        }
+
+        async function handleDeleteFase(modalidadeId, faseParaExcluir) {
+            if (!confirm(`Tem certeza que deseja remover a fase "${faseParaExcluir}"?`)) return;
+
+            const modalidadeRef = doc(db, "modalidades", modalidadeId);
+            const modalidadeDoc = await getDoc(modalidadeRef);
+            const fasesAtuais = modalidadeDoc.exists() ? modalidadeDoc.data().fases || [] : [];
+            const novasFases = fasesAtuais.filter(f => f !== faseParaExcluir);
+            await updateDoc(modalidadeRef, { fases: novasFases });
+
+            renderFasesAdmin(modalidadeId);
+        }
+
+        // --- Sorteio e Gerenciamento de Confrontos (ADM) ---
+        async function handleDrawMatchups(modalidadeId) {
+            if (!confirm(`Deseja sortear os confrontos para a próxima fase de ${modalidadeId}?`)) return;
+
+            const modalidadeRef = doc(db, "modalidades", modalidadeId);
+            const modalidadeDoc = await getDoc(modalidadeRef);
+            if (!modalidadeDoc.exists()) return alert("Modalidade não encontrada.");
+            const fases = modalidadeDoc.data().fases || [];
+            if (fases.length === 0) return alert("Cadastre as fases da modalidade primeiro.");
+
+            // Descobrir qual é a próxima fase a ser sorteada
+            const qConfrontos = query(collection(db, "confrontos"), where("modalidade", "==", modalidadeId));
+            const confrontosSnapshot = await getDocs(qConfrontos);
+            const fasesComConfrontos = [...new Set(confrontosSnapshot.docs.map(d => d.data().fase))];
+            
+            let proximaFase;
+            let participantesParaSorteio = [];
+
+            if (fasesComConfrontos.length === 0) { // Primeiro sorteio
+                proximaFase = fases[0];
+                participantesParaSorteio = inscritosCache.filter(p => p.modalidades.includes(modalidadeId));
+            } else { // Sorteios subsequentes
+                const ultimaFaseSorteada = fases.filter(f => fasesComConfrontos.includes(f)).pop();
+                
+                // Verificar se a última fase foi concluída
+                const confrontosDaUltimaFase = confrontosSnapshot.docs.filter(d => d.data().fase === ultimaFaseSorteada);
+                if (confrontosDaUltimaFase.some(c => !c.data().vencedor_id)) {
+                    return alert(`A fase "${ultimaFaseSorteada}" ainda não foi finalizada. Preencha todos os placares.`);
+                }
+                
+                const indiceUltimaFase = fases.indexOf(ultimaFaseSorteada);
+                if (indiceUltimaFase + 1 >= fases.length) return alert("Todas as fases já foram sorteadas!");
+                proximaFase = fases[indiceUltimaFase + 1];
+
+                // Pegar os vencedores da fase anterior
+                const idsVencedores = confrontosDaUltimaFase.map(c => c.data().vencedor_id);
+                participantesParaSorteio = inscritosCache.filter(p => idsVencedores.includes(p.id));
+            }
+
+            if (participantesParaSorteio.length < 2) return alert("Não há participantes suficientes para sortear.");
+            
+            // Lógica do Sorteio
+            const shuffled = participantesParaSorteio.sort(() => 0.5 - Math.random());
+            const batch = writeBatch(db);
+
+            for (let i = 0; i < shuffled.length; i += 2) {
+                if (i + 1 < shuffled.length) { // Forma um par
+                    const p1 = shuffled[i];
+                    const p2 = shuffled[i+1];
+                    const confrontosRef = doc(collection(db, "confrontos"));
+                    batch.set(confrontosRef, {
+                        modalidade: modalidadeId,
+                        fase: proximaFase,
+                        p1_id: p1.id, p1_nome: p1.nome,
+                        p2_id: p2.id, p2_nome: p2.nome,
+                        placar1: null, placar2: null,
+                        vencedor_id: null,
+                        criado_em: new Date()
+                    });
+                } else { // Participante "bye" (ímpar)
+                    const p1 = shuffled[i];
+                    const confrontosRef = doc(collection(db, "confrontos"));
+                     batch.set(confrontosRef, {
+                        modalidade: modalidadeId,
+                        fase: proximaFase,
+                        p1_id: p1.id, p1_nome: p1.nome,
+                        p2_id: null, p2_nome: "BYE",
+                        placar1: "W", placar2: "O",
+                        vencedor_id: p1.id,
+                        criado_em: new Date()
+                    });
+                }
+            }
+            await batch.commit();
+            alert(`Confrontos para a fase "${proximaFase}" sorteados com sucesso!`);
+            renderConfrontosAdmin(modalidadeId);
+        }
+        
+        // Renderiza confrontos no painel ADM para inserir placares
+        async function renderConfrontosAdmin(modalidadeId) {
+            adminConfrontosList.innerHTML = 'Carregando confrontos...';
+            const q = query(collection(db, "confrontos"), where("modalidade", "==", modalidadeId), orderBy("criado_em"));
+            const snapshot = await getDocs(q);
+            adminConfrontosList.innerHTML = '';
+            
+            if (snapshot.empty) {
+                adminConfrontosList.innerHTML = '<p class="text-sm text-gray-500">Nenhum confronto sorteado.</p>';
+                return;
+            }
+
+            const confrontosPorFase = {};
+            snapshot.forEach(doc => {
+                const data = {id: doc.id, ...doc.data()};
+                if (!confrontosPorFase[data.fase]) confrontosPorFase[data.fase] = [];
+                confrontosPorFase[data.fase].push(data);
+            });
+
+            const modalidadeDoc = await getDoc(doc(db, "modalidades", modalidadeId));
+            const fasesOrdenadas = modalidadeDoc.data().fases || Object.keys(confrontosPorFase);
+
+            fasesOrdenadas.forEach(fase => {
+                if (!confrontosPorFase[fase]) return;
+                
+                const faseDiv = document.createElement('div');
+                faseDiv.innerHTML = `<h5 class="font-semibold mt-3 mb-1">${fase}</h5>`;
+                confrontosPorFase[fase].forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = "grid grid-cols-5 gap-2 items-center text-sm p-2 border rounded";
+                    const isFinalizado = c.vencedor_id !== null;
+                    const p1_class = c.vencedor_id === c.p1_id ? 'font-bold text-green-600' : '';
+                    const p2_class = c.vencedor_id === c.p2_id ? 'font-bold text-green-600' : '';
+                    
+                    div.innerHTML = `
+                        <span class="col-span-2 text-right ${p1_class}">${c.p1_nome}</span>
+                        <div class="col-span-1 flex justify-center items-center gap-1">
+                            <input type="number" value="${c.placar1 ?? ''}" class="w-10 text-center border rounded" ${isFinalizado ? 'disabled' : ''}>
+                            <span>x</span>
+                            <input type="number" value="${c.placar2 ?? ''}" class="w-10 text-center border rounded" ${isFinalizado ? 'disabled' : ''}>
+                        </div>
+                        <span class="col-span-2 ${p2_class}">${c.p2_nome}</span>`;
+                    
+                    if (!isFinalizado && c.p2_id) { // Só mostra botão se não estiver finalizado e não for BYE
+                        const btn = document.createElement('button');
+                        btn.className = "bg-gray-700 hover:bg-black text-white text-xs px-2 py-1 rounded ml-1";
+                        btn.textContent = "Salvar";
+                        btn.onclick = () => {
+                            const placar1 = div.querySelectorAll('input')[0].value;
+                            const placar2 = div.querySelectorAll('input')[1].value;
+                            handleSaveScore(c.id, placar1, placar2, modalidadeId);
+                        };
+                        div.querySelector('.col-span-1').appendChild(btn);
+                    }
+                    faseDiv.appendChild(div);
+                });
+                adminConfrontosList.appendChild(faseDiv);
+            });
+        }
+        
+        async function handleSaveScore(confrontoId, placar1, placar2, modalidadeId) {
+            placar1 = parseInt(placar1);
+            placar2 = parseInt(placar2);
+            if (isNaN(placar1) || isNaN(placar2)) return alert("Placar inválido.");
+
+            const confrontoRef = doc(db, "confrontos", confrontoId);
+            const confrontoDoc = await getDoc(confrontoRef);
+            const data = confrontoDoc.data();
+
+            let vencedor_id = null;
+            if (placar1 > placar2) vencedor_id = data.p1_id;
+            else if (placar2 > placar1) vencedor_id = data.p2_id;
+            else return alert("O placar não pode ser um empate.");
+
+            await updateDoc(confrontoRef, { placar1, placar2, vencedor_id });
+            renderConfrontosAdmin(modalidadeId); // Re-renderiza a lista do ADM
+        }
+
+        // --- Lógica da Visão Pública de Confrontos ---
+        confrontosFilter.addEventListener('change', () => {
+             renderPublicConfrontos(confrontosFilter.value);
+        });
+        
+        onSnapshot(query(collection(db, "confrontos"), orderBy("criado_em")), (snapshot) => {
+             renderPublicConfrontos(confrontosFilter.value); // Re-renderiza quando houver qualquer mudança
+        });
+
+        async function renderPublicConfrontos(modalidadeId) {
+            confrontosList.innerHTML = 'Carregando...';
+            
+            let q;
+            if (modalidadeId) {
+                q = query(collection(db, "confrontos"), where("modalidade", "==", modalidadeId), orderBy("criado_em"));
+            } else {
+                q = query(collection(db, "confrontos"), orderBy("criado_em"));
+            }
+            
+            const snapshot = await getDocs(q);
+            confrontosList.innerHTML = '';
+            if (snapshot.empty) {
+                confrontosList.innerHTML = '<p class="text-sm text-gray-500">Nenhum confronto para exibir.</p>';
+                return;
+            }
+
+            const confrontosPorFase = {};
+             snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (!confrontosPorFase[data.fase]) confrontosPorFase[data.fase] = [];
+                confrontosPorFase[data.fase].push(data);
+             });
+            
+             const fasesOrdenadas = Object.keys(confrontosPorFase);
+
+             fasesOrdenadas.forEach(fase => {
+                const faseDiv = document.createElement('div');
+                faseDiv.innerHTML = `<h3 class="font-bold text-lg mt-4 mb-2">${fase}</h3>`;
+                confrontosPorFase[fase].forEach(c => {
+                    if (c.vencedor_id) { // Só mostra confrontos finalizados
+                        const p1_class = c.vencedor_id === c.p1_id ? 'font-bold text-green-700' : 'text-gray-500';
+                        const p2_class = c.vencedor_id === c.p2_id ? 'font-bold text-green-700' : 'text-gray-500';
+                        const div = document.createElement('div');
+                        div.className = "flex justify-between items-center p-3 border rounded-lg shadow-sm";
+                        div.innerHTML = `
+                            <div class="text-right flex-1 ${p1_class}">${c.p1_nome}</div>
+                            <div class="mx-4 font-mono text-center">
+                                <span class="bg-gray-200 px-2 py-1 rounded">${c.placar1 ?? '-'}</span>
+                                <span class="mx-1">x</span>
+                                <span class="bg-gray-200 px-2 py-1 rounded">${c.placar2 ?? '-'}</span>
+                            </div>
+                            <div class="flex-1 ${p2_class}">${c.p2_nome}</div>
+                        `;
+                        faseDiv.appendChild(div);
+                    }
+                });
+                if (faseDiv.children.length > 1) { // Só adiciona o H3 se tiver confrontos
+                    confrontosList.appendChild(faseDiv);
+                }
+             });
+
+             if (confrontosList.innerHTML === '') {
+                 confrontosList.innerHTML = '<p class="text-sm text-gray-500">Nenhum resultado finalizado para exibir nesta modalidade.</p>';
+             }
+        }
+        
+        // --- Exportar CSV (Existente) ---
+        exportCSVBtn.addEventListener("click", () => {
+            if (inscritosCache.length === 0) return alert("Nenhum inscrito para exportar!");
             let csv = "Matrícula,Nome,Setor,Telefone,Modalidades\n";
             inscritosCache.forEach(e => {
                 csv += `"${e.matricula}","${e.nome}","${e.setor}","${e.telefone}","${e.modalidades.join(" | ")}"\n`;
             });
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" }); // Adiciona BOM para Excel
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
             a.download = "inscritos.csv";
             a.click();
+            URL.revokeObjectURL(url);
         });
 
-        carregarModalidades();
-        carregarLimite();
+        // --- Inicialização ---
+        async function init() {
+            await carregarModalidades();
+            await carregarLimite();
+            renderPublicConfrontos(confrontosFilter.value);
+        }
+
+        init();
     </script>
 </body>
 </html>
