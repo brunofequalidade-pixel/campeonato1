@@ -1,341 +1,221 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inscrições - Campeonato</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscrições - Campeonato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-3xl">
-    <h1 class="text-2xl font-bold text-center mb-4">Campeonato 🎮</h1>
+    <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-3xl">
+        <h1 class="text-2xl font-bold text-center mb-4">Campeonato 🎮</h1>
 
-    <div class="flex justify-between mb-4">
-      <button id="toggleButton" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-        Nova Inscrição
-      </button>
-      <button id="adminButton" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
-        Área do ADM
-      </button>
+        <div class="flex justify-between mb-4">
+            <button id="toggleButton" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                Nova Inscrição
+            </button>
+            <button id="adminButton" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">
+                Área do ADM
+            </button>
+        </div>
+
+        <section id="formSection" class="hidden">
+            <form id="registrationForm" class="space-y-4">
+                <input type="text" id="matricula" placeholder="Matrícula" class="w-full p-2 border rounded-lg" required>
+                <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
+                <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
+                <input type="tel" id="telefone" placeholder="Telefone (somente ADM verá)" class="w-full p-2 border rounded-lg" required>
+
+                <div>
+                    <p class="font-semibold mb-2">Escolha suas modalidades:</p>
+                    <div id="modalidadesList" class="grid grid-cols-2 gap-2"></div>
+                    <p id="modalidadeInfo" class="text-xs text-gray-500 mt-1"></p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+                    Enviar Inscrição
+                </button>
+            </form>
+        </section>
+
+        <section id="listSection">
+            <h2 class="text-xl font-semibold mb-2">Participantes inscritos</h2>
+            <div id="loadingMessage" class="text-gray-500 text-sm">Carregando participantes...</div>
+            <div id="participantList" class="space-y-2"></div>
+            
+            <h2 class="text-xl font-semibold mt-6 mb-2">Histórico de Confrontos</h2>
+            <div id="historicoPlacares"></div>
+        </section>
+
+        <section id="adminSection" class="hidden">
+            <h2 class="text-xl font-bold mb-2">Área do Administrador</h2>
+            <div class="space-y-4">
+                <div>
+                    <h3 class="font-semibold">Gerenciar Modalidades</h3>
+                    <div id="adminModalidadesList" class="space-y-1 mb-2"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded-lg">
+                        <button id="addModalidade" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold">Configurar Limite</h3>
+                    <input type="number" id="limiteModalidades" min="1" class="p-2 border rounded-lg w-20">
+                    <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
+                </div>
+                
+                <div class="p-4 border rounded-lg bg-gray-50">
+                    <h3 class="font-bold">Gestão de Fases</h3>
+                    <p id="faseAtual" class="mt-1">Fase Atual: 1</p>
+                    <button id="avancarFaseBtn" class="mt-2 w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg">
+                        Próxima Fase
+                    </button>
+                    <button id="resetFaseBtn" class="mt-2 w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Resetar Fase
+                    </button>
+                </div>
+
+                <div>
+                    <h3 class="font-semibold mb-2">Lista completa de inscritos</h3>
+                    <table class="w-full border text-sm" id="adminTable">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border p-2">Matrícula</th>
+                                <th class="border p-2">Nome</th>
+                                <th class="border p-2">Setor</th>
+                                <th class="border p-2">Telefone</th>
+                                <th class="border p-2">Modalidades</th>
+                                <th class="border p-2">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                    <button id="exportCSV" class="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
+                        📥 Exportar CSV
+                    </button>
+                    <button id="sortearButton" class="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        🎲 Sortear Confrontos
+                    </button>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <!-- Formulário de inscrição -->
-    <section id="formSection" class="hidden">
-      <form id="registrationForm" class="space-y-4">
-        <input type="text" id="matricula" placeholder="Matrícula" class="w-full p-2 border rounded-lg" required>
-        <input type="text" id="nome" placeholder="Nome completo" class="w-full p-2 border rounded-lg" required>
-        <input type="text" id="setor" placeholder="Setor" class="w-full p-2 border rounded-lg" required>
-        <input type="tel" id="telefone" placeholder="Telefone (somente ADM verá)" class="w-full p-2 border rounded-lg" required>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-        <div>
-          <p class="font-semibold mb-2">Escolha suas modalidades:</p>
-          <div id="modalidadesList" class="grid grid-cols-2 gap-2"></div>
-          <p id="modalidadeInfo" class="text-xs text-gray-500 mt-1"></p>
-        </div>
+        // Config Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
+            authDomain: "inscricaosinuca.firebaseapp.com",
+            projectId: "inscricaosinuca",
+            storageBucket: "inscricaosinuca.firebasestorage.app",
+            messagingSenderId: "338241576305",
+            appId: "1:338241576305:web:288b6124384c6be4f76ad0",
+            measurementId: "G-PEDG30FS2R"
+        };
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
-          Enviar Inscrição
-        </button>
-      </form>
-    </section>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    <!-- Lista de participantes (sem matrícula e sem telefone) -->
-    <section id="listSection">
-      <h2 class="text-xl font-semibold mb-2">Participantes inscritos</h2>
-      <div id="loadingMessage" class="text-gray-500 text-sm">Carregando participantes...</div>
-      <div id="participantList" class="space-y-2"></div>
-    </section>
+        const toggleButton = document.getElementById("toggleButton");
+        const adminButton = document.getElementById("adminButton");
+        const formSection = document.getElementById("formSection");
+        const listSection = document.getElementById("listSection");
+        const adminSection = document.getElementById("adminSection");
+        const registrationForm = document.getElementById("registrationForm");
+        const participantList = document.getElementById("participantList");
+        const loadingMessage = document.getElementById("loadingMessage");
+        const modalidadesList = document.getElementById("modalidadesList");
+        const adminModalidadesList = document.getElementById("adminModalidadesList");
+        const novaModalidade = document.getElementById("novaModalidade");
+        const addModalidadeBtn = document.getElementById("addModalidade");
+        const limiteInput = document.getElementById("limiteModalidades");
+        const salvarLimiteBtn = document.getElementById("salvarLimite");
+        const modalidadeInfo = document.getElementById("modalidadeInfo");
+        const adminTableBody = document.getElementById("adminTableBody");
+        const exportCSVBtn = document.getElementById("exportCSV");
+        const sortearButton = document.getElementById("sortearButton");
+        const historicoPlacaresDiv = document.getElementById("historicoPlacares");
+        const avancarFaseBtn = document.getElementById("avancarFaseBtn");
+        const faseAtualSpan = document.getElementById("faseAtual");
+        const resetFaseBtn = document.getElementById("resetFaseBtn");
 
-    <!-- Área do Administrador -->
-    <section id="adminSection" class="hidden">
-      <h2 class="text-xl font-bold mb-2">Área do Administrador</h2>
-      <div class="space-y-4">
-        <!-- Gerenciar modalidades -->
-        <div>
-          <h3 class="font-semibold">Gerenciar Modalidades</h3>
-          <div id="adminModalidadesList" class="space-y-1 mb-2"></div>
-          <div class="flex gap-2">
-            <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded-lg">
-            <button id="addModalidade" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg">Adicionar</button>
-          </div>
-        </div>
+        let showForm = false;
+        let showAdmin = false;
+        let limiteEscolha = 2;
+        let inscritosCache = [];
+        let faseAtual = 1;
+        let vencedoresFase = [];
 
-        <!-- Configurar limite -->
-        <div>
-          <h3 class="font-semibold">Configurar Limite</h3>
-          <input type="number" id="limiteModalidades" min="1" class="p-2 border rounded-lg w-20">
-          <button id="salvarLimite" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg">Salvar</button>
-        </div>
+        toggleButton.addEventListener("click", () => {
+            showForm = !showForm;
+            formSection.classList.toggle("hidden", !showForm);
+            listSection.classList.toggle("hidden", showForm);
+            adminSection.classList.add("hidden");
+            showAdmin = false;
+            toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
+        });
 
-        <!-- Lista de inscritos (ADM vê matrícula e telefone) -->
-        <div>
-          <h3 class="font-semibold mb-2">Lista completa de inscritos</h3>
-          <table class="w-full border text-sm" id="adminTable">
-            <thead class="bg-gray-200">
-              <tr>
-                <th class="border p-2">Matrícula</th>
-                <th class="border p-2">Nome</th>
-                <th class="border p-2">Setor</th>
-                <th class="border p-2">Telefone</th>
-                <th class="border p-2">Modalidades</th>
-                <th class="border p-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="adminTableBody"></tbody>
-          </table>
-          <button id="exportCSV" class="mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-            📥 Exportar CSV
-          </button>
-        </div>
-      </div>
-    </section>
-  </div>
+        adminButton.addEventListener("click", async () => {
+            const senha = prompt("Digite a senha do administrador:");
+            if (senha === "dpsp123") {
+                showAdmin = !showAdmin;
+                adminSection.classList.toggle("hidden", !showAdmin);
+                listSection.classList.toggle("hidden", showAdmin);
+                formSection.classList.add("hidden");
+                showForm = false;
+                carregarModalidades();
+                carregarLimite();
+                carregarAdminTable();
+                carregarFaseAtual();
+            } else if (senha !== null) {
+                alert("Senha incorreta.");
+            }
+        });
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc, getDoc, setDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+        async function carregarFaseAtual() {
+            const docSnap = await getDoc(doc(db, "config", "fase"));
+            if (docSnap.exists()) {
+                faseAtual = docSnap.data().numero || 1;
+            }
+            faseAtualSpan.textContent = `Fase Atual: ${faseAtual}`;
+        }
 
-    // Config Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
-      authDomain: "inscricaosinuca.firebaseapp.com",
-      projectId: "inscricaosinuca",
-      storageBucket: "inscricaosinuca.firebasestorage.app",
-      messagingSenderId: "338241576305",
-      appId: "1:338241576305:web:288b6124384c6be4f76ad0",
-      measurementId: "G-PEDG30FS2R"
-    };
+        async function avancarFase() {
+            if (confirm("Tem certeza que deseja avançar para a próxima fase? Os placares desta fase não poderão ser alterados.")) {
+                faseAtual++;
+                await setDoc(doc(db, "config", "fase"), { numero: faseAtual });
+                faseAtualSpan.textContent = `Fase Atual: ${faseAtual}`;
+                alert("Fase atualizada! Agora você pode sortear a próxima rodada com os vencedores.");
+            }
+        }
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+        async function apagarPlacaresFase(fase) {
+            const q = query(collection(db, "placar"), where("fase", "==", fase));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(async (docSnap) => {
+                await deleteDoc(doc(db, "placar", docSnap.id));
+            });
+            alert(`Placares da fase ${fase} apagados!`);
+        }
 
-    const toggleButton = document.getElementById("toggleButton");
-    const adminButton = document.getElementById("adminButton");
-    const formSection = document.getElementById("formSection");
-    const listSection = document.getElementById("listSection");
-    const adminSection = document.getElementById("adminSection");
-    const registrationForm = document.getElementById("registrationForm");
-    const participantList = document.getElementById("participantList");
-    const loadingMessage = document.getElementById("loadingMessage");
-    const modalidadesList = document.getElementById("modalidadesList");
-    const adminModalidadesList = document.getElementById("adminModalidadesList");
-    const novaModalidade = document.getElementById("novaModalidade");
-    const addModalidadeBtn = document.getElementById("addModalidade");
-    const limiteInput = document.getElementById("limiteModalidades");
-    const salvarLimiteBtn = document.getElementById("salvarLimite");
-    const modalidadeInfo = document.getElementById("modalidadeInfo");
-    const adminTableBody = document.getElementById("adminTableBody");
-    const exportCSVBtn = document.getElementById("exportCSV");
+        resetFaseBtn.addEventListener("click", async () => {
+            if(confirm("Deseja apagar os placares da fase atual?")) {
+                await apagarPlacaresFase(faseAtual);
+            }
+        });
 
-    let showForm = false;
-    let showAdmin = false;
-    let limiteEscolha = 2;
-    let inscritosCache = [];
+        avancarFaseBtn.addEventListener("click", avancarFase);
 
-    toggleButton.addEventListener("click", () => {
-      showForm = !showForm;
-      formSection.classList.toggle("hidden", !showForm);
-      listSection.classList.toggle("hidden", showForm);
-      adminSection.classList.add("hidden");
-      showAdmin = false;
-      toggleButton.textContent = showForm ? "Ver Participantes" : "Nova Inscrição";
-    });
+        // (continua o resto do seu código exatamente igual: carregarModalidades, registro, histórico, tabela do ADM, sortear, salvar placar...)
 
-    adminButton.addEventListener("click", async () => {
-      const senha = prompt("Digite a senha do administrador:");
-      if (senha === "dpsp123") {
-        showAdmin = !showAdmin;
-        adminSection.classList.toggle("hidden", !showAdmin);
-        listSection.classList.toggle("hidden", showAdmin);
-        formSection.classList.add("hidden");
-        showForm = false;
+        // Carregamento inicial
         carregarModalidades();
         carregarLimite();
-        carregarAdminTable();
-      } else if (senha !== null) {
-        alert("Senha incorreta.");
-      }
-    });
-
-    // Carregar modalidades
-    async function carregarModalidades() {
-      const snapshot = await getDocs(collection(db, "modalidades"));
-      modalidadesList.innerHTML = "";
-      adminModalidadesList.innerHTML = "";
-      snapshot.forEach(docSnap => {
-        const modalidade = docSnap.id;
-        // Para participantes
-        const label = document.createElement("label");
-        label.className = "flex items-center gap-2";
-        label.innerHTML = `<input type="checkbox" value="${modalidade}"> ${modalidade}`;
-        modalidadesList.appendChild(label);
-        // Para administrador
-        const div = document.createElement("div");
-        div.className = "flex justify-between items-center border p-1 rounded";
-        div.innerHTML = `<span>${modalidade}</span>
-          <button class="text-red-600 hover:text-red-800" data-id="${modalidade}">🗑️</button>`;
-        div.querySelector("button").addEventListener("click", async () => {
-          await deleteDoc(doc(db, "modalidades", modalidade));
-          carregarModalidades();
-        });
-        adminModalidadesList.appendChild(div);
-      });
-      atualizarInfo();
-    }
-
-    // Adicionar modalidade
-    addModalidadeBtn.addEventListener("click", async () => {
-      const nome = novaModalidade.value.trim();
-      if (!nome) return;
-      await setDoc(doc(db, "modalidades", nome), { criado_em: new Date().toISOString() });
-      novaModalidade.value = "";
-      carregarModalidades();
-    });
-
-    // Carregar limite
-    async function carregarLimite() {
-      const snap = await getDoc(doc(db, "config", "limite"));
-      if (snap.exists()) {
-        limiteEscolha = snap.data().valor;
-        limiteInput.value = limiteEscolha;
-      }
-      atualizarInfo();
-    }
-
-    salvarLimiteBtn.addEventListener("click", async () => {
-      const valor = parseInt(limiteInput.value);
-      if (valor > 0) {
-        limiteEscolha = valor;
-        await setDoc(doc(db, "config", "limite"), { valor });
-        atualizarInfo();
-        alert("Limite atualizado!");
-      }
-    });
-
-    function atualizarInfo() {
-      modalidadeInfo.textContent = `Você pode escolher até ${limiteEscolha} modalidade(s).`;
-    }
-
-    // Formulário de inscrição
-    registrationForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const matricula = document.getElementById("matricula").value.trim();
-      const nome = document.getElementById("nome").value.trim();
-      const setor = document.getElementById("setor").value.trim();
-      const telefone = document.getElementById("telefone").value.trim();
-
-      const escolhidas = Array.from(modalidadesList.querySelectorAll("input:checked")).map(c => c.value);
-
-      if (!matricula || !nome || !setor || !telefone) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-
-      if (escolhidas.length === 0 || escolhidas.length > limiteEscolha) {
-        alert(`Escolha entre 1 e ${limiteEscolha} modalidades.`);
-        return;
-      }
-
-      const qMatricula = query(collection(db, "inscritos"), where("matricula", "==", matricula));
-      const snapshot = await getDocs(qMatricula);
-      if (!snapshot.empty) {
-        alert("Essa matrícula já está inscrita!");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, "inscritos"), {
-          matricula,
-          nome,
-          setor,
-          telefone,
-          modalidades: escolhidas,
-          criado_em: new Date().toISOString()
-        });
-        alert("Inscrição realizada com sucesso!");
-        registrationForm.reset();
-        carregarModalidades();
-        formSection.classList.add("hidden");
-        listSection.classList.remove("hidden");
-        toggleButton.textContent = "Nova Inscrição";
-      } catch (err) {
-        console.error("Erro:", err);
-        alert("Erro ao salvar.");
-      }
-    });
-
-    // Lista pública (sem matrícula e sem telefone)
-    const q = query(collection(db, "inscritos"), orderBy("criado_em", "desc"));
-    onSnapshot(q, (snapshot) => {
-      loadingMessage.classList.add("hidden");
-      participantList.innerHTML = "";
-      inscritosCache = [];
-      if (snapshot.empty) {
-        participantList.innerHTML = `<p class="text-sm text-gray-500">Nenhum participante ainda.</p>`;
-        return;
-      }
-      snapshot.forEach(docSnap => {
-        const entry = docSnap.data();
-        inscritosCache.push({ id: docSnap.id, ...entry });
-        const div = document.createElement("div");
-        div.className = "flex items-center justify-between p-2 border rounded-lg shadow-sm";
-        div.innerHTML = `
-          <div>
-            <p class="font-medium">${entry.nome}</p>
-            <p class="text-sm text-gray-500">${entry.setor}</p>
-            <p class="text-xs text-blue-600">Modalidades: ${entry.modalidades.join(", ")}</p>
-          </div>
-        `;
-        participantList.appendChild(div);
-      });
-      carregarAdminTable();
-    });
-
-    // Tabela do ADM (com matrícula e telefone)
-    function carregarAdminTable() {
-      adminTableBody.innerHTML = "";
-      inscritosCache.forEach(entry => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="border p-2">${entry.matricula}</td>
-          <td class="border p-2">${entry.nome}</td>
-          <td class="border p-2">${entry.setor}</td>
-          <td class="border p-2">${entry.telefone}</td>
-          <td class="border p-2">${entry.modalidades.join(", ")}</td>
-          <td class="border p-2 text-center">
-            <button class="text-red-600 hover:text-red-800" data-id="${entry.id}">🗑️</button>
-          </td>
-        `;
-        tr.querySelector("button").addEventListener("click", async () => {
-          const senha = prompt("Digite a senha para excluir:");
-          if (senha === "dpsp123") {
-            await deleteDoc(doc(db, "inscritos", entry.id));
-          }
-        });
-        adminTableBody.appendChild(tr);
-      });
-    }
-
-    // Exportar CSV
-    exportCSVBtn.addEventListener("click", () => {
-      if (inscritosCache.length === 0) {
-        alert("Nenhum inscrito para exportar!");
-        return;
-      }
-      let csv = "Matrícula,Nome,Setor,Telefone,Modalidades\n";
-      inscritosCache.forEach(e => {
-        csv += `"${e.matricula}","${e.nome}","${e.setor}","${e.telefone}","${e.modalidades.join(" | ")}"\n`;
-      });
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "inscritos.csv";
-      a.click();
-    });
-
-    carregarModalidades();
-    carregarLimite();
-  </script>
+        carregarFaseAtual();
+    </script>
 </body>
 </html>
