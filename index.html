@@ -17,8 +17,129 @@
             <button id="adminBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">⚙️ Admin</button>
         </div>
 
-        <!-- Seções (inscrição, lista, acompanhar, admin) -->
-        <!-- ... (tudo igual ao seu código anterior até a parte do script) ... -->
+        <section id="inscricaoSection" class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-bold mb-4">Nova Inscrição</h2>
+            <div id="inscricaoDesabilitada" class="hidden">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                    <p class="text-red-800 font-semibold">❌ Inscrições encerradas</p>
+                    <p class="text-red-600 text-sm mt-1">As inscrições para o campeonato não estão disponíveis no momento.</p>
+                </div>
+            </div>
+            <form id="inscricaoForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="matricula" placeholder="Matrícula" class="p-2 border rounded-lg" required>
+                    <input type="text" id="nome" placeholder="Nome completo" class="p-2 border rounded-lg" required>
+                    <input type="text" id="setor" placeholder="Setor" class="p-2 border rounded-lg" required>
+                    <input type="tel" id="telefone" placeholder="Telefone" class="p-2 border rounded-lg" required>
+                </div>
+                <div>
+                    <p class="font-semibold mb-2">Escolha suas modalidades:</p>
+                    <div id="modalidadesList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2"></div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">Enviar Inscrição</button>
+            </form>
+        </section>
+
+        <section id="publicoSection" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+            <h2 class="text-xl font-bold mb-4">Participantes Inscritos</h2>
+            <div id="participantesList" class="space-y-3"></div>
+        </section>
+
+        <section id="acompanharSection" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+            <h2 class="text-xl font-bold mb-4">Acompanhar Jogos</h2>
+            <div id="jogosAcompanhar" class="space-y-4"></div>
+        </section>
+
+        <section id="adminSection" class="bg-white p-6 rounded-lg shadow mb-6 hidden">
+            <h2 class="text-xl font-bold mb-4">Área Administrativa</h2>
+
+            <div class="flex flex-wrap gap-2 mb-4 border-b pb-4">
+                <button id="configTab" class="bg-gray-600 text-white px-3 py-1 rounded">Config</button>
+                <button id="fasesTab" class="bg-gray-400 text-white px-3 py-1 rounded">Fases</button>
+                <button id="placaresTab" class="bg-gray-400 text-white px-3 py-1 rounded">Placares</button>
+                <button id="resetTab" class="bg-gray-400 text-white px-3 py-1 rounded">Reset</button>
+            </div>
+
+            <div id="configDiv" class="space-y-6">
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h3 class="text-lg font-semibold mb-2">Controle de Inscrições</h3>
+                    <div class="flex items-center gap-3">
+                        <button id="toggleInscricaoBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                            <span id="inscricaoStatus">🟢 Inscrições Habilitadas</span>
+                        </button>
+                        <p class="text-sm text-gray-600">Clique para habilitar/desabilitar as inscrições do campeonato</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Modalidades</h3>
+                    <div id="adminModalidadesList" class="space-y-2 mb-3"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="novaModalidade" placeholder="Nova modalidade" class="flex-1 p-2 border rounded">
+                        <button id="addModalidade" class="bg-green-600 text-white px-3 py-2 rounded">Add</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Limite de Modalidades por Participante</h3>
+                    <div class="flex gap-2">
+                        <input type="number" id="limiteInput" min="1" value="2" class="p-2 border rounded w-20">
+                        <button id="salvarLimite" class="bg-blue-600 text-white px-3 py-2 rounded">Salvar</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Gerenciar Participantes</h3>
+                    <button id="exportBtn" class="bg-indigo-600 text-white px-4 py-2 rounded mr-2">Exportar CSV</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full border text-sm text-left">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="border p-2">Nome</th>
+                                <th class="border p-2">Setor</th>
+                                <th class="border p-2">Telefone</th>
+                                <th class="border p-2">Modalidades</th>
+                                <th class="border p-2 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaInscritos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="fasesDiv" class="hidden">
+                <h3 class="font-semibold mb-2">Gerenciar Fases</h3>
+                <select id="faseModalidade" class="p-2 border rounded mb-2 w-full md:w-auto"></select>
+                <button id="criarFaseBtn" class="bg-green-600 text-white px-3 py-2 rounded">Criar Fase e Jogos</button>
+                <div id="listaFases" class="mt-4 space-y-2"></div>
+            </div>
+
+            <div id="placaresDiv" class="hidden">
+                <h3 class="font-semibold mb-2">Atualizar Placares</h3>
+                <select id="placarModalidade" class="p-2 border rounded mb-2 w-full md:w-auto"></select>
+                <div id="listaJogos" class="space-y-3"></div>
+            </div>
+
+            <div id="resetDiv" class="hidden space-y-4">
+                <div class="bg-red-50 p-4 rounded border border-red-200">
+                    <h3 class="font-semibold text-red-800 mb-2">⚠️ Reset Granular</h3>
+                    <p class="text-red-700 mb-4">Escolha qual parte do campeonato você deseja apagar. As ações são permanentes.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="resetFasesJogosBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Apagar Fases e Jogos</button>
+                        <button id="resetInscritosBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Apagar Inscritos</button>
+                        <button id="resetModalidadesBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Apagar Modalidades</button>
+                    </div>
+                </div>
+                <div class="bg-red-100 p-4 rounded border border-red-300">
+                    <h3 class="font-semibold text-red-900 mb-2">🚨 Reset Completo do Campeonato</h3>
+                    <p class="text-red-800 mb-4">Apaga TUDO: inscritos, modalidades, fases e jogos.</p>
+                    <button id="resetCompletoBtn" class="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded">Reset Completo</button>
+                </div>
+            </div>
+        </section>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
@@ -42,9 +163,310 @@
         const jogosCol = collection(db, "jogos");
         const configDocRef = doc(db, "config", "geral");
 
-        // ... (todo o restante do código continua igual até o trecho de criar fases) ...
+        // --- NAVEGAÇÃO ---
+        function showSection(name) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(name + 'Section').classList.remove('hidden');
+            
+            if (name === 'inscricao') {
+                verificarStatusInscricao();
+            }
+        }
 
-        /* ---------- ADMIN: CRIAR FASES (alterado para duplas) ---------- */
+        document.getElementById('inscricaoBtn').addEventListener('click', () => showSection('inscricao'));
+        document.getElementById('publicoBtn').addEventListener('click', carregarListaPublica);
+        document.getElementById('acompanharBtn').addEventListener('click', carregarAcompanhar);
+        document.getElementById('adminBtn').addEventListener('click', async () => {
+            const senha = prompt("Senha do administrador:");
+            if (senha === 'caio') {
+                showSection('admin');
+                carregarAdmin();
+            } else if (senha) {
+                alert('Senha incorreta');
+            }
+        });
+
+        function showAdminTab(tab) {
+            ['config', 'fases', 'placares', 'reset'].forEach(t => {
+                document.getElementById(t + 'Div').classList.add('hidden');
+                const elTab = document.getElementById(t + 'Tab');
+                if (elTab) elTab.classList.remove('bg-gray-600'), elTab.classList.add('bg-gray-400');
+            });
+            document.getElementById(tab + 'Div').classList.remove('hidden');
+            const activeTab = document.getElementById(tab + 'Tab');
+            if (activeTab) activeTab.classList.remove('bg-gray-400'), activeTab.classList.add('bg-gray-600');
+            if (tab === 'config') carregarTabelaInscritos();
+            if (tab === 'fases') carregarFasesAdmin();
+            if (tab === 'placares') carregarJogosAdmin();
+        }
+
+        document.getElementById('configTab').addEventListener('click', () => showAdminTab('config'));
+        document.getElementById('fasesTab').addEventListener('click', () => showAdminTab('fases'));
+        document.getElementById('placaresTab').addEventListener('click', () => showAdminTab('placares'));
+        document.getElementById('resetTab').addEventListener('click', () => showAdminTab('reset'));
+
+        // --- CONFIG GERAL ---
+        let limite = 2;
+        let inscricoesHabilitadas = true;
+
+        async function carregarConfigGeral() {
+            try {
+                const snap = await getDoc(configDocRef);
+                if (snap.exists()) {
+                    const config = snap.data();
+                    limite = config?.limite || 2;
+                    inscricoesHabilitadas = config?.inscricoesHabilitadas !== false;
+                } else {
+                    limite = 2;
+                    inscricoesHabilitadas = true;
+                }
+                document.getElementById('limiteInput').value = limite;
+                atualizarStatusInscricao();
+            } catch (e) {
+                console.error("Erro ao carregar config:", e);
+            }
+        }
+
+        function atualizarStatusInscricao() {
+            const btn = document.getElementById('toggleInscricaoBtn');
+            const status = document.getElementById('inscricaoStatus');
+            
+            if (inscricoesHabilitadas) {
+                btn.className = 'bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg';
+                status.textContent = '🟢 Inscrições Habilitadas';
+            } else {
+                btn.className = 'bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg';
+                status.textContent = '🔴 Inscrições Desabilitadas';
+            }
+        }
+
+        function verificarStatusInscricao() {
+            const form = document.getElementById('inscricaoForm');
+            const mensagem = document.getElementById('inscricaoDesabilitada');
+            
+            if (inscricoesHabilitadas) {
+                form.classList.remove('hidden');
+                mensagem.classList.add('hidden');
+            } else {
+                form.classList.add('hidden');
+                mensagem.classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('toggleInscricaoBtn').addEventListener('click', async () => {
+            try {
+                inscricoesHabilitadas = !inscricoesHabilitadas;
+                await setDoc(configDocRef, { inscricoesHabilitadas }, { merge: true });
+                atualizarStatusInscricao();
+                
+                const statusText = inscricoesHabilitadas ? 'habilitadas' : 'desabilitadas';
+                alert(`Inscrições ${statusText} com sucesso!`);
+                
+                if (!document.getElementById('inscricaoSection').classList.contains('hidden')) {
+                    verificarStatusInscricao();
+                }
+            } catch (e) {
+                console.error("Erro ao alterar status das inscrições:", e);
+                alert('Erro ao alterar status das inscrições.');
+            }
+        });
+
+        async function carregarModalidades() {
+            const snap = await getDocs(modalidadesCol);
+            const arr = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+            const els = {
+                inscricao: document.getElementById('modalidadesList'),
+                admin: document.getElementById('adminModalidadesList'),
+                fase: document.getElementById('faseModalidade'),
+                placar: document.getElementById('placarModalidade')
+            };
+
+            Object.values(els).forEach(el => el.innerHTML = '');
+
+            els.fase.innerHTML = '<option value="">Todas as Modalidades</option>';
+            els.placar.innerHTML = '<option value="">Selecione a Modalidade</option>';
+
+            arr.forEach(m => {
+                els.inscricao.insertAdjacentHTML('beforeend', `<label class="flex items-center gap-2 p-2 border rounded cursor-pointer"><input type="checkbox" value="${m.nome}"> ${m.nome}</label>`);
+                els.admin.insertAdjacentHTML('beforeend', `<div class="flex justify-between items-center p-2 border rounded"><span>${m.nome}</span><button class="text-red-600 px-2" data-id="${m.id}">🗑️</button></div>`);
+                els.fase.insertAdjacentHTML('beforeend', `<option value="${m.nome}">${m.nome}</option>`);
+                els.placar.insertAdjacentHTML('beforeend', `<option value="${m.nome}">${m.nome}</option>`);
+            });
+
+            els.admin.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.onclick = async () => {
+                    if (!confirm('Remover esta modalidade?')) return;
+                    await deleteDoc(doc(db, 'modalidades', btn.dataset.id));
+                    carregarModalidades();
+                }
+            });
+        }
+
+        document.getElementById('addModalidade').addEventListener('click', async () => {
+            const nomeInput = document.getElementById('novaModalidade');
+            const nome = nomeInput.value.trim();
+            if (!nome) return alert('Digite o nome da modalidade.');
+            const q = query(modalidadesCol, where("nome", "==", nome));
+            const exists = !(await getDocs(q)).empty;
+            if (exists) return alert('Essa modalidade já existe.');
+            await addDoc(modalidadesCol, { nome });
+            nomeInput.value = '';
+            carregarModalidades();
+        });
+
+        document.getElementById('salvarLimite').addEventListener('click', async () => {
+            limite = parseInt(document.getElementById('limiteInput').value) || 2;
+            await setDoc(configDocRef, { limite }, { merge: true });
+            alert('Limite salvo com sucesso!');
+        });
+
+        // --- INSCRIÇÕES ---
+        document.getElementById('inscricaoForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            
+            if (!inscricoesHabilitadas) {
+                alert('As inscrições estão desabilitadas no momento.');
+                return;
+            }
+            
+            try {
+                const data = {
+                    matricula: document.getElementById('matricula').value.trim(),
+                    nome: document.getElementById('nome').value.trim(),
+                    setor: document.getElementById('setor').value.trim(),
+                    telefone: document.getElementById('telefone').value.trim(),
+                    modalidades: Array.from(document.querySelectorAll('#modalidadesList input:checked')).map(i => i.value)
+                };
+                if (!data.matricula || !data.nome || !data.setor || !data.telefone) return alert('Por favor, preencha todos os campos.');
+                if (data.modalidades.length === 0 || data.modalidades.length > limite) return alert(`Escolha entre 1 e ${limite} modalidades.`);
+                const q = query(inscritosCol, where("matricula", "==", data.matricula));
+                if (!(await getDocs(q)).empty) return alert('Esta matrícula já está inscrita.');
+                await addDoc(inscritosCol, { ...data, criado: new Date().toISOString() });
+                alert('Inscrição realizada com sucesso!');
+                e.target.reset();
+                carregarModalidades();
+            } catch (err) {
+                console.error("Erro ao salvar inscrição:", err);
+                alert('Ocorreu um erro ao salvar a inscrição.');
+            }
+        });
+
+        // --- LISTA PÚBLICA & ACOMPANHAMENTO ---
+        async function carregarListaPublica() {
+            showSection('publico');
+            const div = document.getElementById('participantesList');
+            div.innerHTML = '';
+            const snap = await getDocs(query(inscritosCol));
+            if (snap.empty) {
+                div.innerHTML = '<p class="text-gray-500">Nenhum participante inscrito ainda.</p>';
+                return;
+            }
+            snap.docs
+                .map(d => d.data())
+                .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+                .forEach(p => {
+                    div.insertAdjacentHTML('beforeend', `<div class="p-3 border rounded-lg bg-white"><h3 class="font-semibold">${p.nome}</h3><p class="text-gray-600 text-sm">${p.setor}</p><p class="text-sm text-blue-600 mt-1">Modalidades: ${p.modalidades.join(', ')}</p></div>`);
+                });
+        }
+
+        async function carregarAcompanhar() {
+            showSection('acompanhar');
+            const jogosDiv = document.getElementById('jogosAcompanhar');
+            jogosDiv.innerHTML = '<p class="text-gray-500">Carregando jogos...</p>';
+            const snap = await getDocs(jogosCol);
+            if (snap.empty) {
+                jogosDiv.innerHTML = '<p class="text-gray-500">Ainda não há jogos definidos.</p>';
+                return;
+            }
+
+            const jogosPorModalidade = snap.docs.reduce((acc, docu) => {
+                const jogo = docu.data();
+                const mod = jogo.modalidade || 'Sem Modalidade';
+                const faseKey = (typeof jogo.fase !== 'undefined') ? String(jogo.fase) : '0';
+                if (!acc[mod]) acc[mod] = {};
+                if (!acc[mod][faseKey]) acc[mod][faseKey] = [];
+                acc[mod][faseKey].push(jogo);
+                return acc;
+            }, {});
+
+            const modalidadesOrdenadas = Object.keys(jogosPorModalidade).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            let html = '';
+            modalidadesOrdenadas.forEach(modalidade => {
+                html += `<h2 class="text-xl font-bold mt-6">${modalidade}</h2>`;
+                const fasesOrdenadas = Object.keys(jogosPorModalidade[modalidade]).sort((a, b) => parseInt(a) - parseInt(b));
+                fasesOrdenadas.forEach(fase => {
+                    html += `<h3 class="text-lg font-semibold mt-2 border-b pb-1">Fase ${fase}</h3>`;
+                    jogosPorModalidade[modalidade][fase].forEach(j => {
+                        const statusClass = j.finalizado ? 'bg-green-50 text-green-800' : '';
+                        html += `<div class="p-3 border rounded-lg flex justify-between items-center ${statusClass}">
+                            <span>${j.dupla1} vs ${j.dupla2}</span>
+                            <span class="font-bold text-lg">${j.placar1 || 0} x ${j.placar2 || 0}</span>
+                        </div>`;
+                    });
+                });
+            });
+            jogosDiv.innerHTML = html;
+        }
+
+        // --- ADMIN ---
+        function carregarAdmin() {
+            showAdminTab('config');
+        }
+
+        async function carregarTabelaInscritos() {
+            const tbody = document.getElementById('tabelaInscritos');
+            tbody.innerHTML = '<tr><td colspan="5" class="p-2 text-center">Carregando...</td></tr>';
+            const snap = await getDocs(inscritosCol);
+            if (snap.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-2 text-center text-gray-500">Nenhum inscrito encontrado.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            snap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+                .forEach(p => {
+                    tbody.insertAdjacentHTML('beforeend', `<tr>
+                        <td class="border p-2">${p.nome}</td>
+                        <td class="border p-2">${p.setor}</td>
+                        <td class="border p-2">${p.telefone || '-'}</td>
+                        <td class="border p-2">${p.modalidades.join(', ')}</td>
+                        <td class="border p-2 text-center">
+                            <button class="text-red-600 hover:text-red-800" data-id="${p.id}" title="Remover Inscrição">🗑️</button>
+                        </td>
+                    </tr>`);
+                });
+            tbody.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.onclick = async () => {
+                    if (confirm('Tem certeza que deseja remover este participante?')) {
+                        await deleteDoc(doc(db, 'inscritos', btn.dataset.id));
+                        carregarTabelaInscritos();
+                    }
+                };
+            });
+        }
+
+        /* ---------- ADMIN: FASES ---------- */
+        async function carregarFasesAdmin() {
+            const modalidade = document.getElementById('faseModalidade').value;
+            const lista = document.getElementById('listaFases');
+            lista.innerHTML = '<p>Carregando...</p>';
+            const q = modalidade ? query(fasesCol, where("modalidade", "==", modalidade)) : query(fasesCol);
+            const snap = await getDocs(q);
+            if (snap.empty) {
+                lista.innerHTML = '<p class="text-gray-500">Nenhuma fase criada para esta modalidade.</p>';
+                return;
+            }
+            lista.innerHTML = '';
+            snap.docs
+                .map(d => d.data())
+                .sort((a, b) => `${a.modalidade}-${a.numero}`.localeCompare(`${b.modalidade}-${b.numero}`))
+                .forEach(f => {
+                    lista.insertAdjacentHTML('beforeend', `<div class="p-2 border rounded">Modalidade: <strong>${f.modalidade}</strong> – Fase: <strong>${f.numero}</strong> – Jogadores: <strong>${f.players.length}</strong></div>`);
+                });
+        }
+
+        document.getElementById('faseModalidade').addEventListener('change', carregarFasesAdmin);
         document.getElementById('criarFaseBtn').addEventListener('click', async () => {
             const modalidade = document.getElementById('faseModalidade').value;
             if (!modalidade) return alert('Selecione uma modalidade para criar a fase.');
@@ -67,65 +489,192 @@
 
                 for (const docu of jogosSnap.docs) {
                     const j = docu.data();
-                    const partidaFinalizada = (j.placar1 >= 2 || j.placar2 >= 2);
+                    const partidaFinalizada = (j.placar1 === 2 && j.placar2 < 2) || (j.placar2 === 2 && j.placar1 < 2);
                     if (!partidaFinalizada) {
-                        return alert('Todos os jogos da fase anterior precisam estar finalizados.');
+                        return alert('Não é possível criar a próxima fase. Todos os jogos da fase anterior devem estar finalizados com um vencedor (placar 2x0 ou 2x1).');
                     }
-                    if (j.placar1 > j.placar2) {
-                        vencedores.push(j.dupla1);
-                        perdedores.push(j.dupla2);
+                    if (j.placar1 === 2) {
+                        const duplaVencedora = j.dupla1.split(' + ');
+                        vencedores.push(...duplaVencedora);
+                        const duplaPerdedora = j.dupla2.split(' + ');
+                        perdedores.push(...duplaPerdedora);
                     } else {
-                        vencedores.push(j.dupla2);
-                        perdedores.push(j.dupla1);
+                        const duplaVencedora = j.dupla2.split(' + ');
+                        vencedores.push(...duplaVencedora);
+                        const duplaPerdedora = j.dupla1.split(' + ');
+                        perdedores.push(...duplaPerdedora);
                     }
                 }
 
-                // "achatando" vencedores (que já são duplas)
-                players = vencedores.flatMap(d => d.split(" + ").map(nome => ({ nome })));
+                if (vencedores.length % 2 !== 0 && perdedores.length > 0) {
+                    const sorteado = perdedores[Math.floor(Math.random() * perdedores.length)];
+                    alert(`Para completar a chave da competição, o participante "${sorteado}" foi sorteado para a próxima fase!`);
+                    vencedores.push(sorteado);
+                }
+                players = vencedores.map(nome => ({ nome }));
             }
 
-            if (players.length < 4) return alert('Não há jogadores suficientes para criar duplas.');
+            if (players.length < 4) return alert('Não há jogadores suficientes para criar a fase (mínimo 4 jogadores para formar 2 duplas).');
 
-            // embaralha lista
+            // Embaralhar jogadores
             players.sort(() => Math.random() - 0.5);
 
-            // formar duplas
-            let duplas = [];
-            for (let i = 0; i < players.length; i += 2) {
-                if (!players[i + 1]) {
-                    alert(`O jogador ${players[i].nome} ficou sem dupla e foi descartado.`);
-                    continue;
+            // Verificar se sobra jogador ímpar
+            let jogadoresDescartados = [];
+            if (players.length % 4 !== 0) {
+                const sobra = players.length % 4;
+                jogadoresDescartados = players.splice(players.length - sobra, sobra);
+                if (jogadoresDescartados.length > 0) {
+                    alert(`⚠️ Atenção: ${jogadoresDescartados.length} jogador(es) foi(ram) descartado(s) por não formar duplas completas:\n${jogadoresDescartados.map(p => p.nome).join(', ')}`);
                 }
-                duplas.push(players[i].nome + " + " + players[i + 1].nome);
             }
 
-            if (duplas.length < 2) return alert('Não há duplas suficientes para criar jogos.');
-
-            // embaralha duplas
-            duplas.sort(() => Math.random() - 0.5);
-
+            // Criar jogos com duplas
             const batch = writeBatch(db);
-            for (let i = 0; i < duplas.length; i += 2) {
-                if (!duplas[i + 1]) continue;
+            const todasDuplas = [];
+            
+            for (let i = 0; i < players.length; i += 4) {
+                if (i + 3 >= players.length) continue;
+                
+                const dupla1 = `${players[i].nome} + ${players[i + 1].nome}`;
+                const dupla2 = `${players[i + 2].nome} + ${players[i + 3].nome}`;
+                
+                todasDuplas.push(dupla1, dupla2);
+                
                 const jogoRef = doc(collection(db, "jogos"));
                 batch.set(jogoRef, {
                     modalidade,
                     fase: numero,
-                    dupla1: duplas[i],
-                    dupla2: duplas[i + 1],
+                    dupla1: dupla1,
+                    dupla2: dupla2,
                     placar1: 0,
                     placar2: 0,
                     finalizado: false
                 });
             }
+            
             await batch.commit();
             await addDoc(fasesCol, { modalidade, numero, players: players.map(p => p.nome) });
-            alert(`Fase ${numero} para ${modalidade} criada com confrontos de duplas!`);
+            alert(`Fase ${numero} para ${modalidade} criada com sucesso!`);
             carregarFasesAdmin();
         });
 
-        // ... (restante do código continua igual) ...
+        /* ---------- ADMIN: PLACARES ---------- */
+        async function carregarJogosAdmin() {
+            const modalidade = document.getElementById('placarModalidade').value;
+            const lista = document.getElementById('listaJogos');
+            lista.innerHTML = '';
+            if (!modalidade) return lista.innerHTML = '<p class="text-gray-500">Selecione a modalidade para ver os jogos.</p>';
+            lista.innerHTML = '<p>Carregando jogos...</p>';
+            const q = query(jogosCol, where('modalidade', '==', modalidade), where('finalizado', '==', false));
+            const snap = await getDocs(q);
+            if (snap.empty) return lista.innerHTML = '<p class="text-gray-500">Nenhum jogo cadastrado para esta modalidade.</p>';
+            lista.innerHTML = '';
+            snap.docs.map(d => ({ id: d.id, ...d.data() })).forEach(j => {
+                const finalizadoClass = j.finalizado ? 'bg-gray-100.opacity-70' : '';
+                const botoesDesabilitados = j.finalizado ? 'disabled' : '';
+                lista.insertAdjacentHTML('beforeend', `<div class="p-3 border rounded ${finalizadoClass}">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="font-medium">${j.dupla1} <span class="font-bold text-xl">${j.placar1 || 0}</span> x <span class="font-bold text-xl">${j.placar2 || 0}</span> ${j.dupla2}</div>
+                        ${j.finalizado ? '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">FINALIZADO</span>' : `<button class="bg-green-500 text-white px-2 py-1 text-sm rounded btn-finalizar" data-id="${j.id}">Finalizar</button>`}
+                    </div>
+                    <div class="flex gap-2 flex-wrap items-center border-t pt-2 mt-2">
+                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="1" data-op="inc" ${botoesDesabilitados}>+1 ${j.dupla1}</button>
+                        <button class="bg-gray-400 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="1" data-op="dec" ${botoesDesabilitados}>-1</button>
+                        <span class="mx-2 text-gray-300">|</span>
+                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="2" data-op="inc" ${botoesDesabilitados}>+1 ${j.dupla2}</button>
+                        <button class="bg-gray-400 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="2" data-op="dec" ${botoesDesabilitados}>-1</button>
+                    </div>
+                </div>`);
+            });
 
+            lista.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.onclick = async () => {
+                    const { id, p, op } = btn.dataset;
+                    const docRef = doc(db, 'jogos', id);
+                    if (btn.classList.contains('btn-finalizar')) {
+                        if (confirm('Deseja finalizar esta partida? O placar não poderá mais ser alterado.')) {
+                            await updateDoc(docRef, { finalizado: true });
+                            carregarJogosAdmin();
+                        }
+                    } else {
+                        const docSnap = await getDoc(docRef);
+                        if (!docSnap.exists()) return;
+                        const placarAtual = docSnap.data()['placar' + p] || 0;
+                        let novoPlacar = placarAtual;
+                        if (op === 'inc') novoPlacar++;
+                        else if (op === 'dec' && placarAtual > 0) novoPlacar--;
+
+                        await updateDoc(docRef, { ['placar' + p]: novoPlacar });
+                        const gameDiv = btn.closest('.p-3.border.rounded');
+                        if (gameDiv) {
+                            const placarSpans = gameDiv.querySelectorAll('.font-bold.text-xl');
+                            if (p === '1' && placarSpans.length > 0) placarSpans[0].innerText = novoPlacar;
+                            if (p === '2' && placarSpans.length > 1) placarSpans[1].innerText = novoPlacar;
+                        }
+                    }
+                };
+            });
+        }
+
+        document.getElementById('placarModalidade').addEventListener('change', carregarJogosAdmin);
+
+        /* ---------- ADMIN: EXPORTAR E RESET ---------- */
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            const snap = await getDocs(inscritosCol);
+            let csv = 'Nome,Setor,Telefone,Modalidades\n';
+            snap.forEach(d => {
+                const p = d.data();
+                csv += `"${p.nome}","${p.setor}","${p.telefone}","${p.modalidades.join(' | ')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'inscritos_campeonato.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+
+        async function resetCollections(collectionNames, confirmationMessage) {
+            if (!confirm(confirmationMessage)) return;
+            try {
+                const batch = writeBatch(db);
+                for (const name of collectionNames) {
+                    const snap = await getDocs(collection(db, name));
+                    snap.forEach(d => batch.delete(d.ref));
+                }
+                await batch.commit();
+                alert(`${collectionNames.join(', ')} resetado(s) com sucesso.`);
+                carregarModalidades();
+                carregarTabelaInscritos();
+                carregarFasesAdmin();
+                carregarJogosAdmin();
+                carregarListaPublica();
+            } catch (e) {
+                console.error("Erro no reset:", e);
+                alert("Ocorreu um erro durante o reset.");
+            }
+        }
+
+        document.getElementById('resetFasesJogosBtn').addEventListener('click', () => resetCollections(['fases', 'jogos'], '⚠️ ATENÇÃO!\n\nIsso apagará TODAS as fases e jogos criados. Deseja continuar?'));
+        document.getElementById('resetInscritosBtn').addEventListener('click', () => resetCollections(['inscritos'], '⚠️ ATENÇÃO!\n\nIsso apagará TODOS os participantes inscritos. Deseja continuar?'));
+        document.getElementById('resetModalidadesBtn').addEventListener('click', () => resetCollections(['modalidades'], '⚠️ ATENÇÃO!\n\nIsso apagará TODAS as modalidades cadastradas. Deseja continuar?'));
+        document.getElementById('resetCompletoBtn').addEventListener('click', async () => {
+            if (confirm('🚨 ALERTA MÁXIMO! 🚨\n\nIsso apagará TODO o campeonato (inscritos, modalidades, fases, jogos e configurações).\n\nEsta ação é irreversível. Tem certeza absoluta?')) {
+                await resetCollections(['inscritos', 'modalidades', 'fases', 'jogos'], 'Confirmando reset completo...');
+                try {
+                    await deleteDoc(configDocRef);
+                } catch (e) {
+                    console.warn('Erro ao apagar config', e);
+                }
+                alert("Reset completo finalizado.");
+                carregarConfigGeral();
+            }
+        });
+
+        // --- INICIALIZAÇÃO ---
+        carregarConfigGeral();
+        carregarModalidades();
     </script>
 </body>
 </html>
