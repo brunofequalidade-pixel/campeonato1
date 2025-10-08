@@ -17,18 +17,6 @@
             <button id="adminBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg">⚙️ Admin</button>
         </div>
 
-        <!-- Toast de Notificação -->
-        <div id="notificationToast" class="hidden fixed top-4 right-4 bg-blue-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-sm">
-            <div class="flex items-start gap-3">
-                <span class="text-2xl">🔔</span>
-                <div class="flex-1">
-                    <p id="notificationTitle" class="font-bold text-sm"></p>
-                    <p id="notificationBody" class="text-sm mt-1"></p>
-                </div>
-                <button id="closeToast" class="text-white hover:text-gray-200">✕</button>
-            </div>
-        </div>
-
         <section id="inscricaoSection" class="bg-white p-6 rounded-lg shadow mb-6">
             <h2 class="text-xl font-bold mb-4">Nova Inscrição</h2>
             <div id="inscricaoDesabilitada" class="hidden">
@@ -155,7 +143,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
-        import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, setDoc, updateDoc, getDoc, query, where, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, setDoc, updateDoc, getDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBo8G3ZcWk4EepN0cHdVBtXc7tGOfcw-yg",
@@ -175,124 +163,12 @@
         const jogosCol = collection(db, "jogos");
         const configDocRef = doc(db, "config", "geral");
 
-        // --- SISTEMA DE NOTIFICAÇÕES ---
-        let notificacoesHabilitadas = false;
-        let ultimoJogoId = null;
-
-        function solicitarPermissaoNotificacao() {
-            if ("Notification" in window && Notification.permission === "default") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        notificacoesHabilitadas = true;
-                        mostrarToast("Notificações Ativadas", "Você receberá alertas sobre o campeonato!");
-                    }
-                });
-            } else if (Notification.permission === "granted") {
-                notificacoesHabilitadas = true;
-            }
-        }
-
-        function mostrarToast(titulo, mensagem) {
-            const toast = document.getElementById('notificationToast');
-            const titleEl = document.getElementById('notificationTitle');
-            const bodyEl = document.getElementById('notificationBody');
-            
-            titleEl.textContent = titulo;
-            bodyEl.textContent = mensagem;
-            
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 5000);
-        }
-
-        function mostrarNotificacao(titulo, mensagem) {
-            mostrarToast(titulo, mensagem);
-            
-            if (notificacoesHabilitadas && Notification.permission === "granted") {
-                new Notification(titulo, {
-                    body: mensagem,
-                    icon: "🏆",
-                    tag: "campeonato"
-                });
-            }
-        }
-
-        document.getElementById('closeToast').addEventListener('click', () => {
-            document.getElementById('notificationToast').classList.add('hidden');
-        });
-
-        // Listener em tempo real para novos jogos
-        function iniciarListenerJogos() {
-            onSnapshot(jogosCol, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        const jogo = change.doc.data();
-                        if (ultimoJogoId !== change.doc.id) {
-                            ultimoJogoId = change.doc.id;
-                            mostrarNotificacao(
-                                `🎮 Novo Jogo: ${jogo.modalidade}`,
-                                `${jogo.dupla1} vs ${jogo.dupla2} - Fase ${jogo.fase}`
-                            );
-                        }
-                    } else if (change.type === "modified") {
-                        const jogo = change.doc.data();
-                        if (jogo.finalizado) {
-                            const vencedor = jogo.placar1 > jogo.placar2 ? jogo.dupla1 : jogo.dupla2;
-                            mostrarNotificacao(
-                                `✅ Jogo Finalizado: ${jogo.modalidade}`,
-                                `${vencedor} venceu! Placar: ${jogo.placar1} x ${jogo.placar2}`
-                            );
-                        } else if (jogo.placar1 > 0 || jogo.placar2 > 0) {
-                            mostrarNotificacao(
-                                `🔄 Placar Atualizado: ${jogo.modalidade}`,
-                                `${jogo.dupla1} ${jogo.placar1} x ${jogo.placar2} ${jogo.dupla2}`
-                            );
-                        }
-                    }
-                });
-            });
-        }
-
-        // Listener em tempo real para novas inscrições
-        function iniciarListenerInscricoes() {
-            onSnapshot(inscritosCol, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        const inscrito = change.doc.data();
-                        mostrarNotificacao(
-                            "✅ Nova Inscrição",
-                            `${inscrito.nome} se inscreveu no campeonato!`
-                        );
-                    }
-                });
-            });
-        }
-
-        // Listener para mudanças de configuração
-        function iniciarListenerConfig() {
-            onSnapshot(configDocRef, (doc) => {
-                if (doc.exists()) {
-                    const config = doc.data();
-                    if (config.inscricoesHabilitadas !== inscricoesHabilitadas) {
-                        const status = config.inscricoesHabilitadas ? "abertas" : "encerradas";
-                        mostrarNotificacao(
-                            `📢 Inscrições ${status}`,
-                            config.inscricoesHabilitadas 
-                                ? "As inscrições estão abertas!" 
-                                : "As inscrições foram encerradas."
-                        );
-                    }
-                }
-            });
-        }
-
         // --- NAVEGAÇÃO ---
         function showSection(name) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(name + 'Section').classList.remove('hidden');
             
+            // Verificar status das inscrições ao mostrar seção de inscrição
             if (name === 'inscricao') {
                 verificarStatusInscricao();
             }
@@ -330,7 +206,7 @@
         document.getElementById('placaresTab').addEventListener('click', () => showAdminTab('placares'));
         document.getElementById('resetTab').addEventListener('click', () => showAdminTab('reset'));
 
-        // --- CONFIG GERAL ---
+        // --- CONFIG GERAL (MODALIDADES, LIMITE E CONTROLE DE INSCRIÇÕES) ---
         let limite = 2;
         let inscricoesHabilitadas = true;
 
@@ -387,6 +263,7 @@
                 const statusText = inscricoesHabilitadas ? 'habilitadas' : 'desabilitadas';
                 alert(`Inscrições ${statusText} com sucesso!`);
                 
+                // Atualizar a tela de inscrições se estiver visível
                 if (!document.getElementById('inscricaoSection').classList.contains('hidden')) {
                     verificarStatusInscricao();
                 }
@@ -449,6 +326,7 @@
         document.getElementById('inscricaoForm').addEventListener('submit', async e => {
             e.preventDefault();
             
+            // Verificar se inscrições estão habilitadas
             if (!inscricoesHabilitadas) {
                 alert('As inscrições estão desabilitadas no momento.');
                 return;
@@ -524,7 +402,7 @@
                     jogosPorModalidade[modalidade][fase].forEach(j => {
                         const statusClass = j.finalizado ? 'bg-green-50 text-green-800' : '';
                         html += `<div class="p-3 border rounded-lg flex justify-between items-center ${statusClass}">
-                            <span>${j.dupla1} vs ${j.dupla2}</span>
+                            <span>${j.jogador1} vs ${j.jogador2}</span>
                             <span class="font-bold text-lg">${j.placar1 || 0} x ${j.placar2 || 0}</span>
                         </div>`;
                     });
@@ -587,7 +465,7 @@
                 .map(d => d.data())
                 .sort((a, b) => `${a.modalidade}-${a.numero}`.localeCompare(`${b.modalidade}-${b.numero}`))
                 .forEach(f => {
-                    lista.insertAdjacentHTML('beforeend', `<div class="p-2 border rounded">Modalidade: <strong>${f.modalidade}</strong> – Fase: <strong>${f.numero}</strong> – Jogadores: <strong>${f.players.length}</strong></div>`);
+                    lista.insertAdjacentHTML('beforeend', `<div class="p-2 border rounded">Modalidade: <strong>${f.modalidade}</strong> — Fase: <strong>${f.numero}</strong> — Jogadores: <strong>${f.players.length}</strong></div>`);
                 });
         }
 
@@ -619,15 +497,11 @@
                         return alert('Não é possível criar a próxima fase. Todos os jogos da fase anterior devem estar finalizados com um vencedor (placar 2x0 ou 2x1).');
                     }
                     if (j.placar1 === 2) {
-                        const duplaVencedora = j.dupla1.split(' + ');
-                        vencedores.push(...duplaVencedora);
-                        const duplaPerdedora = j.dupla2.split(' + ');
-                        perdedores.push(...duplaPerdedora);
+                        vencedores.push(j.jogador1);
+                        perdedores.push(j.jogador2);
                     } else {
-                        const duplaVencedora = j.dupla2.split(' + ');
-                        vencedores.push(...duplaVencedora);
-                        const duplaPerdedora = j.dupla1.split(' + ');
-                        perdedores.push(...duplaPerdedora);
+                        vencedores.push(j.jogador2);
+                        perdedores.push(j.jogador1);
                     }
                 }
 
@@ -639,45 +513,24 @@
                 players = vencedores.map(nome => ({ nome }));
             }
 
-            if (players.length < 4) return alert('Não há jogadores suficientes para criar a fase (mínimo 4 jogadores para formar 2 duplas).');
+            if (players.length < 2) return alert('Não há jogadores suficientes para criar a fase.');
 
-            // Embaralhar jogadores
             players.sort(() => Math.random() - 0.5);
 
-            // Verificar se sobra jogador ímpar
-            let jogadoresDescartados = [];
-            if (players.length % 4 !== 0) {
-                const sobra = players.length % 4;
-                jogadoresDescartados = players.splice(players.length - sobra, sobra);
-                if (jogadoresDescartados.length > 0) {
-                    alert(`⚠️ Atenção: ${jogadoresDescartados.length} jogador(es) foi(ram) descartado(s) por não formar duplas completas:\n${jogadoresDescartados.map(p => p.nome).join(', ')}`);
-                }
-            }
-
-            // Criar jogos com duplas
             const batch = writeBatch(db);
-            const todasDuplas = [];
-            
-            for (let i = 0; i < players.length; i += 4) {
-                if (i + 3 >= players.length) continue;
-                
-                const dupla1 = `${players[i].nome} + ${players[i + 1].nome}`;
-                const dupla2 = `${players[i + 2].nome} + ${players[i + 3].nome}`;
-                
-                todasDuplas.push(dupla1, dupla2);
-                
+            for (let i = 0; i < players.length; i += 2) {
+                if (!players[i + 1]) continue;
                 const jogoRef = doc(collection(db, "jogos"));
                 batch.set(jogoRef, {
                     modalidade,
                     fase: numero,
-                    dupla1: dupla1,
-                    dupla2: dupla2,
+                    jogador1: players[i].nome,
+                    jogador2: players[i + 1].nome,
                     placar1: 0,
                     placar2: 0,
                     finalizado: false
                 });
             }
-            
             await batch.commit();
             await addDoc(fasesCol, { modalidade, numero, players: players.map(p => p.nome) });
             alert(`Fase ${numero} para ${modalidade} criada com sucesso!`);
@@ -700,14 +553,14 @@
                 const botoesDesabilitados = j.finalizado ? 'disabled' : '';
                 lista.insertAdjacentHTML('beforeend', `<div class="p-3 border rounded ${finalizadoClass}">
                     <div class="flex justify-between items-center mb-2">
-                        <div class="font-medium">${j.dupla1} <span class="font-bold text-xl">${j.placar1 || 0}</span> x <span class="font-bold text-xl">${j.placar2 || 0}</span> ${j.dupla2}</div>
+                        <div class="font-medium">${j.jogador1} <span class="font-bold text-xl">${j.placar1 || 0}</span> x <span class="font-bold text-xl">${j.placar2 || 0}</span> ${j.jogador2}</div>
                         ${j.finalizado ? '<span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">FINALIZADO</span>' : `<button class="bg-green-500 text-white px-2 py-1 text-sm rounded btn-finalizar" data-id="${j.id}">Finalizar</button>`}
                     </div>
                     <div class="flex gap-2 flex-wrap items-center border-t pt-2 mt-2">
-                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="1" data-op="inc" ${botoesDesabilitados}>+1 ${j.dupla1}</button>
+                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="1" data-op="inc" ${botoesDesabilitados}>+1 ${j.jogador1}</button>
                         <button class="bg-gray-400 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="1" data-op="dec" ${botoesDesabilitados}>-1</button>
                         <span class="mx-2 text-gray-300">|</span>
-                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="2" data-op="inc" ${botoesDesabilitados}>+1 ${j.dupla2}</button>
+                        <button class="bg-blue-500 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="2" data-op="inc" ${botoesDesabilitados}>+1 ${j.jogador2}</button>
                         <button class="bg-gray-400 text-white px-2 py-1 text-xs rounded" data-id="${j.id}" data-p="2" data-op="dec" ${botoesDesabilitados}>-1</button>
                     </div>
                 </div>`);
@@ -798,12 +651,8 @@
         });
 
         // --- INICIALIZAÇÃO ---
-        solicitarPermissaoNotificacao();
         carregarConfigGeral();
         carregarModalidades();
-        iniciarListenerJogos();
-        iniciarListenerInscricoes();
-        iniciarListenerConfig();
     </script>
 </body>
 </html>
